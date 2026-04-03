@@ -1,23 +1,26 @@
 import { useState } from 'react';
-import { Sprout, Terminal, Sun, Moon, Menu, X } from 'lucide-react';
+import { Sprout, Sun, Moon, Menu, X, Search } from 'lucide-react';
 import { useTheme } from '../../providers/ThemeProvider';
 import { useFarmStore } from '../../store/farmStore';
 import DomainSwitcher from '../ui/DomainSwitcher';
 import { cn } from '../../lib/utils';
 import { motion, AnimatePresence } from 'framer-motion';
-
-const NAV_LINKS = [
-  { label: 'Dashboard',       id: 'dashboard' },
-  { label: 'Soil Reports',    id: 'soil'      },
-  { label: 'Advisory Portal', id: 'advisory'  },
-  { label: 'My Crops',        id: 'crops'     },
-  { label: 'Weather',         id: 'weather'   },
-];
+import LanguageSwitcher, { useLanguage } from '../ui/LanguageSwitcher';
 
 export default function Topbar() {
   const { activePage, setActivePage, setCommandPaletteOpen } = useFarmStore();
   const { theme, toggle } = useTheme();
+  const { t } = useLanguage();
   const [mobileOpen, setMobileOpen] = useState(false);
+
+  const NAV_LINKS = [
+    { label: t('dashboard'),       id: 'dashboard' },
+    { label: t('soilReports'),    id: 'soil'      },
+    { label: t('advisoryPortal'), id: 'advisory'  },
+    { label: t('myCrops'),        id: 'crops'     },
+    { label: t('weather'),         id: 'weather'   },
+    { label: t('saveSoilAI'),      id: 'savesoil'  },
+  ];
 
   return (
     <header
@@ -44,10 +47,10 @@ export default function Topbar() {
             className="text-sm font-black tracking-tight text-text"
             style={{ fontFamily: 'var(--font-display)' }}
           >
-            AgriSense
+            KrishiSetu
           </span>
-          <span className="text-[9px] font-black uppercase tracking-widest text-teal-500">
-            Live Intelligence
+          <span className="text-[7px] font-black uppercase tracking-widest text-teal-500 mt-0.5">
+            {t('tagline')}
           </span>
         </div>
       </div>
@@ -82,40 +85,24 @@ export default function Topbar() {
       {/* ── RIGHT: Controls ── */}
       <div className="flex items-center gap-2 shrink-0 ml-auto">
 
-        {/* Domain Switcher */}
-        <div className="hidden lg:block">
-          <DomainSwitcher />
-        </div>
-
-        {/* LIVE indicator */}
-        <div
-          className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-widest"
-          style={{
-            background: 'var(--teal-dim)',
-            color:      'var(--teal-500)',
-            border:     '1px solid var(--border)',
-          }}
-        >
-          <span className="relative flex h-1.5 w-1.5">
-            <span className="animate-ping absolute inline-flex h-full w-full rounded-full opacity-75 bg-teal-500" />
-            <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-teal-500" />
-          </span>
-          LIVE
-        </div>
+        {/* Language Switcher */}
+        <LanguageSwitcher />
 
         {/* ⌘K Search button */}
         <button
           onClick={() => setCommandPaletteOpen(true)}
-          className="flex items-center gap-2 px-3 py-2 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all hover:bg-surface-2"
+          className="group flex items-center gap-2.5 px-3.5 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all hover:bg-teal-500/10 hover:border-teal-500/40 relative overflow-hidden"
           style={{
             background:   'var(--surface-2)',
             border:       '1px solid var(--border)',
             color:        'var(--text-muted)',
           }}
-          title="Command Palette (Ctrl+K)"
+          title="Search / Command Palette (Ctrl+K)"
         >
-          <Terminal className="w-3.5 h-3.5" />
-          <kbd className="hidden sm:block opacity-50">⌘K</kbd>
+          <div className="absolute inset-0 bg-teal-500/0 group-hover:bg-teal-500/5 transition-colors" />
+          <Search className="w-4 h-4 text-teal-500 group-hover:scale-110 group-hover:drop-shadow-[0_0_8px_rgba(20,184,166,0.5)] transition-all" />
+          <span className="hidden lg:block group-hover:text-text transition-colors">Search</span>
+          <kbd className="hidden sm:block opacity-30 group-hover:opacity-60 transition-opacity font-mono text-[9px] bg-white/5 px-1.5 py-0.5 rounded border border-white/10 ml-1">⌘K</kbd>
         </button>
 
         {/* Theme Toggle */}

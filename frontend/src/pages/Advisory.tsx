@@ -1,188 +1,175 @@
 import { useState } from 'react';
-import { CloudRain, Bug, Sprout, FlaskConical, TrendingUp, ChevronDown, ChevronUp, CheckCircle2, AlertTriangle, AlertOctagon, Info } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { AlertTriangle, Filter, Search, CheckCircle2, Clock, MapPin, ArrowRight, ShieldAlert, Bug, Sun, Sprout, TrendingUp } from 'lucide-react';
 import { useFarmStore } from '../store/farmStore';
-import { cn, fadeUp, staggerContainer } from '../lib/utils';
-import type { Advisory as AdvisoryType } from '../store/farmStore';
-
-const categoryConfig = {
-  weather: { icon: CloudRain, label: 'Weather', color: 'bg-sky-100 text-sky-700' },
-  pest: { icon: Bug, label: 'Pest Alert', color: 'bg-red-100 text-red-700' },
-  crop: { icon: Sprout, label: 'Crop Management', color: 'bg-leaf-100 text-leaf-700' },
-  soil: { icon: FlaskConical, label: 'Soil Health', color: 'bg-earth-100 text-earth-700' },
-  market: { icon: TrendingUp, label: 'Market Intel', color: 'bg-sun-100 text-sun-700' },
-};
-
-const severityConfig = {
-  low: { icon: Info, label: 'Low', color: 'text-sky-600 bg-sky-50 border-sky-200' },
-  medium: { icon: AlertTriangle, label: 'Medium', color: 'text-sun-600 bg-sun-50 border-sun-200' },
-  high: { icon: AlertTriangle, label: 'High', color: 'text-orange-600 bg-orange-50 border-orange-200' },
-  critical: { icon: AlertOctagon, label: 'Critical', color: 'text-red-600 bg-red-50 border-red-200' },
-};
-
-function AdvisoryCard({ advisory }: { advisory: AdvisoryType }) {
-  const [expanded, setExpanded] = useState(false);
-  const { markAdvisoryRead } = useFarmStore();
-  const cat = categoryConfig[advisory.category];
-  const sev = severityConfig[advisory.severity];
-  const CatIcon = cat.icon;
-  const SevIcon = sev.icon;
-
-  const handleExpand = () => {
-    setExpanded(!expanded);
-    if (!advisory.isRead) markAdvisoryRead(advisory.id);
-  };
-
-  return (
-    <motion.div
-      variants={fadeUp}
-      className={cn(
-        "glass rounded-3xl border overflow-hidden transition-all duration-500 hover:shadow-xl hover:shadow-earth-900/5",
-        !advisory.isRead ? 'border-sun-300 shadow-lg shadow-sun-100/50 ring-1 ring-sun-500/10' : 'border-earth-100'
-      )}
-    >
-      <div
-        className="p-6 cursor-pointer hover:bg-earth-50/50 transition-colors"
-        onClick={handleExpand}
-      >
-        <div className="flex items-start gap-4">
-          <div className={cn(
-            "w-12 h-12 rounded-2xl flex items-center justify-center shrink-0 shadow-sm transition-transform duration-500",
-            expanded ? "scale-110" : "group-hover:scale-105",
-            cat.color.split(' ')[0]
-          )}>
-            <CatIcon className={cat.color.split(' ')[1]} size={24} />
-          </div>
-          <div className="flex-1 min-w-0 pt-0.5">
-            <div className="flex items-start justify-between gap-3">
-              <div>
-                <div className="flex items-center gap-2.5 flex-wrap">
-                  <h4 className="font-display font-bold text-lg text-earth-900 tracking-tight leading-tight">{advisory.title}</h4>
-                  {!advisory.isRead && (
-                    <span className="flex h-2 w-2">
-                      <span className="animate-ping absolute inline-flex h-2 w-2 rounded-full bg-sun-500 opacity-75"></span>
-                      <span className="relative inline-flex rounded-full h-2 w-2 bg-sun-500"></span>
-                    </span>
-                  )}
-                </div>
-                <div className="flex items-center gap-2.5 mt-2 flex-wrap">
-                  <span className={cn("text-[10px] font-bold px-2 py-1 rounded-lg uppercase tracking-widest leading-none border border-current opacity-70", cat.color)}>{cat.label}</span>
-                  <span className={cn("text-[10px] font-bold px-2 py-1 rounded-lg border uppercase tracking-widest leading-none", sev.color)}>
-                    <SevIcon size={10} className="inline mr-1.5 -mt-0.5" />
-                    {sev.label}
-                  </span>
-                  <span className="text-[10px] font-bold text-earth-400 uppercase tracking-widest">{advisory.date}</span>
-                </div>
-              </div>
-              <button className="p-2 shrink-0 bg-earth-50 rounded-xl transition-colors hover:bg-earth-100">
-                {expanded ? <ChevronUp size={18} className="text-earth-600" /> : <ChevronDown size={18} className="text-earth-400" />}
-              </button>
-            </div>
-            <p className="text-sm text-earth-500 mt-3 font-medium leading-relaxed italic">{advisory.summary}</p>
-          </div>
-        </div>
-      </div>
-
-      <AnimatePresence>
-        {expanded && (
-          <motion.div
-            initial={{ height: 0, opacity: 0 }}
-            animate={{ height: 'auto', opacity: 1 }}
-            exit={{ height: 0, opacity: 0 }}
-            className="overflow-hidden"
-          >
-            <div className="px-5 pb-5 border-t border-earth-100">
-              <p className="text-sm text-earth-600 mt-4 leading-relaxed">{advisory.details}</p>
-              <div className="mt-4">
-                <p className="text-sm font-semibold text-earth-700 mb-2">Action Items:</p>
-                <div className="space-y-2">
-                  {advisory.actionItems.map((item, i) => (
-                    <div key={i} className="flex items-start gap-2 text-sm text-earth-600">
-                      <CheckCircle2 size={16} className="text-leaf-500 shrink-0 mt-0.5" />
-                      <span>{item}</span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-    </motion.div>
-  );
-}
+import { StatusBadge } from '../components/ui/StatusBadge';
+import { useLanguage } from '../components/ui/LanguageSwitcher';
 
 export default function Advisory() {
   const { advisories } = useFarmStore();
-  const [filter, setFilter] = useState<string>('all');
+  const { t } = useLanguage();
+  const [filter, setFilter] = useState('all');
+  const [search, setSearch] = useState('');
 
-  const categories = ['all', 'weather', 'pest', 'crop', 'soil', 'market'];
-  const filtered = filter === 'all' ? advisories : advisories.filter((a) => a.category === filter);
+  const categories = [
+    { id: 'all', label: t('filterAll'), icon: Filter },
+    { id: 'weather', label: t('catWeather'), icon: Sun },
+    { id: 'pest', label: t('catPest'), icon: Bug },
+    { id: 'crop', label: t('catCrop'), icon: Sprout },
+    { id: 'soil', label: t('catSoil'), icon: ShieldAlert },
+    { id: 'market', label: t('catMarket'), icon: TrendingUp },
+  ];
+
+  const filteredAdvisories = advisories.filter(adv => {
+    const matchesFilter = filter === 'all' || adv.category === filter;
+    const matchesSearch = adv.title.toLowerCase().includes(search.toLowerCase()) || 
+                         adv.summary.toLowerCase().includes(search.toLowerCase());
+    return matchesFilter && matchesSearch;
+  });
 
   return (
-    <motion.div 
-      initial="hidden"
-      animate="visible"
-      variants={staggerContainer}
-      className="space-y-8 pb-12"
-    >
+    <div className="space-y-8 pb-20">
       {/* Header */}
-      <motion.div variants={fadeUp}>
-        <h2 className="text-4xl font-display font-bold text-earth-900 tracking-tight">Advisory Portal</h2>
-        <p className="text-earth-500 mt-2 font-medium">Expert recommendations and alerts for your farm</p>
-      </motion.div>
-
-      {/* Filters */}
-      <div className="flex gap-2 flex-wrap">
-        {categories.map((cat) => (
-          <button
-            key={cat}
-            onClick={() => setFilter(cat)}
-            className={`px-4 py-2 rounded-xl text-sm font-medium transition-all ${
-              filter === cat
-                ? 'bg-earth-800 text-earth-50 shadow-lg'
-                : 'bg-white/60 text-earth-600 hover:bg-earth-100 border border-earth-200'
-            }`}
-          >
-            {cat.charAt(0).toUpperCase() + cat.slice(1)}
-          </button>
-        ))}
+      <div className="relative p-10 glass border border-border rounded-[40px] overflow-hidden">
+        <div className="absolute inset-0 opacity-10">
+           <img src="/images/farmer_meeting_real.png" alt="" className="w-full h-full object-cover" />
+        </div>
+        <div className="relative z-10 max-w-2xl">
+          <h1 className="text-4xl font-display font-black text-text tracking-tight mb-4">{t('portalTitle')}</h1>
+          <p className="text-text-muted font-bold text-lg leading-relaxed">
+            {t('portalSub')}
+          </p>
+        </div>
       </div>
 
-      {/* Summary Stats */}
-      <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
-        {Object.entries(categoryConfig).map(([key, config]) => {
-          const count = advisories.filter((a) => a.category === key).length;
-          const Icon = config.icon;
-          return (
-            <motion.div
-              key={key}
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ opacity: 1, scale: 1 }}
-              className={`p-3 rounded-xl text-center cursor-pointer transition-all border ${
-                filter === key ? 'border-earth-400 shadow-md' : 'border-earth-200'
-              } bg-white/60 hover:shadow-md`}
-              onClick={() => setFilter(filter === key ? 'all' : key)}
+      {/* Controls */}
+      <div className="flex flex-col md:flex-row gap-6 items-center justify-between">
+        <div className="flex items-center gap-2 overflow-x-auto pb-2 w-full md:w-auto no-scrollbar">
+          {categories.map((cat) => (
+            <button
+              key={cat.id}
+              onClick={() => setFilter(cat.id)}
+              className={`flex items-center gap-2 px-6 py-3 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all whitespace-nowrap border ${
+                filter === cat.id 
+                  ? 'bg-teal-500 text-bg border-teal-500 shadow-lg shadow-teal-500/20' 
+                  : 'glass border-border text-text-muted hover:border-teal-500/30'
+              }`}
             >
-              <Icon size={20} className={`mx-auto mb-1 ${config.color.split(' ')[1]}`} />
-              <p className="text-lg font-bold text-earth-800">{count}</p>
-              <p className="text-xs text-earth-500">{config.label}</p>
-            </motion.div>
-          );
-        })}
+              <cat.icon size={14} />
+              {cat.label}
+            </button>
+          ))}
+        </div>
+
+        <div className="relative w-full md:w-80 group">
+          <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-text-muted group-hover:text-teal-500 transition-colors" size={18} />
+          <input
+            type="text"
+            placeholder={t('searchAdvisories')}
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            className="w-full pl-12 pr-6 py-4 glass border border-border rounded-2xl text-sm font-bold text-text focus:outline-none focus:border-teal-500/50 transition-all"
+          />
+        </div>
       </div>
 
-      {/* Advisories List */}
-      <div className="space-y-4">
-        {filtered.map((advisory) => (
-          <AdvisoryCard key={advisory.id} advisory={advisory} />
-        ))}
-        {filtered.length === 0 && (
-          <div className="text-center py-12 text-earth-400">
-            <p className="text-lg">No advisories in this category</p>
-          </div>
+      {/* Advisory Feed */}
+      <div className="grid grid-cols-1 gap-6">
+        <AnimatePresence mode="popLayout">
+          {filteredAdvisories.map((adv, i) => {
+            const categoryToKey: Record<string, string> = {
+              weather: 'rainfall',
+              pest: 'pest',
+              crop: 'planting',
+              soil: 'ph',
+              market: 'market'
+            };
+            const nestedKey = categoryToKey[adv.category as keyof typeof categoryToKey];
+            const translatedTitle = nestedKey ? t(`advisory.${nestedKey}.title`) : (t(adv.title.replace(/\s/g, '').replace(/[.-]/g, '') + 'Title') || adv.title);
+            const translatedDesc = nestedKey ? t(`advisory.${nestedKey}.desc`) : (t(adv.summary.replace(/\s/g, '').replace(/[.-]/g, '') + 'Desc') || adv.summary);
+
+            return (
+              <motion.div
+                key={adv.id}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, scale: 0.95 }}
+                transition={{ delay: i * 0.05 }}
+                className="group glass border border-border rounded-[32px] overflow-hidden hover:border-teal-500/30 transition-all duration-500"
+              >
+                <div className="flex flex-col md:flex-row">
+                  <div className="p-8 flex-1">
+                    <div className="flex items-center gap-3 mb-6">
+                      <StatusBadge status={
+                        adv.severity === 'critical' ? 'error' : 
+                        adv.severity === 'high' ? 'warning' : 'info'
+                      }>
+                        {t('sev' + adv.severity.charAt(0).toUpperCase() + adv.severity.slice(1))}
+                      </StatusBadge>
+                      <span className="text-[10px] font-black text-text-muted uppercase tracking-[0.2em] flex items-center gap-2">
+                         <Clock size={12} />
+                         {adv.date}
+                      </span>
+                    </div>
+
+                    <h3 className="text-2xl font-display font-black text-text mb-4 group-hover:text-teal-500 transition-colors">
+                      {translatedTitle}
+                    </h3>
+                    <p className="text-text-muted font-bold leading-relaxed mb-8 max-w-3xl text-sm">
+                      {translatedDesc}
+                    </p>
+
+                    <div className="flex flex-wrap gap-3">
+                      {adv.actionItems.map((action, idx) => (
+                        <div key={idx} className="flex items-center gap-2 px-4 py-2 bg-surface-2 border border-border rounded-xl text-[10px] font-black text-text uppercase tracking-wider">
+                           <CheckCircle2 size={12} className="text-teal-500" />
+                           {t(action.replace(/\s/g, '').replace(/[.-]/g, '')) || action}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div className="bg-surface-2 p-8 md:w-72 border-t md:border-t-0 md:border-l border-border flex flex-col justify-between">
+                     <div className="space-y-6">
+                       <div>
+                          <p className="text-[10px] font-black text-text-muted uppercase tracking-widest mb-2">{t('impactZone')}</p>
+                          <div className="flex items-center gap-2 text-text font-black text-xs uppercase">
+                            <MapPin size={14} className="text-teal-500" />
+                            {adv.category === 'market' ? t('national') : t('GreenValleyFarm')}
+                          </div>
+                       </div>
+                       <div>
+                          <p className="text-[10px] font-black text-text-muted uppercase tracking-widest mb-2">{t('category')}</p>
+                          <div className="flex items-center gap-2 text-text font-black text-xs uppercase">
+                            {t('cat' + adv.category.charAt(0).toUpperCase() + adv.category.slice(1))}
+                          </div>
+                       </div>
+                     </div>
+
+                     <button className="flex items-center justify-between w-full mt-8 p-4 glass border border-border rounded-2xl group/btn hover:bg-teal-500 hover:text-bg transition-all duration-300">
+                        <span className="text-[10px] font-black uppercase tracking-widest">{t('viewDetails')}</span>
+                        <ArrowRight size={16} className="group-hover/btn:translate-x-1 transition-transform" />
+                     </button>
+                  </div>
+                </div>
+              </motion.div>
+            );
+          })}
+        </AnimatePresence>
+
+        {filteredAdvisories.length === 0 && (
+          <motion.div 
+            initial={{ opacity: 0 }} 
+            animate={{ opacity: 1 }}
+            className="text-center py-20 glass border border-border rounded-[40px]"
+          >
+            <div className="w-20 h-20 glass rounded-[32px] border border-teal-500/20 flex items-center justify-center mx-auto mb-6">
+               <AlertTriangle size={32} className="text-teal-500" />
+            </div>
+            <p className="text-text-muted font-black uppercase tracking-widest">{t('noAdvisories')}</p>
+          </motion.div>
         )}
       </div>
-    </motion.div>
+    </div>
   );
 }

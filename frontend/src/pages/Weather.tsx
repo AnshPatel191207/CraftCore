@@ -1,6 +1,7 @@
 import { Sun, CloudRain, Cloud, CloudSun, Wind, Droplets, Eye, Thermometer, Sunrise, Sunset } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
+import { useLanguage } from '../components/ui/LanguageSwitcher';
 
 const hourlyData = [
   { time: '6AM', temp: 22, humidity: 75 },
@@ -12,23 +13,25 @@ const hourlyData = [
   { time: '12AM', temp: 21, humidity: 78 },
 ];
 
-const forecast = [
-  { day: 'Today', icon: Sun, high: 32, low: 21, condition: 'Sunny', rain: 5 },
-  { day: 'Tomorrow', icon: CloudSun, high: 30, low: 20, condition: 'Partly Cloudy', rain: 15 },
-  { day: 'Wed', icon: CloudRain, high: 26, low: 19, condition: 'Rain', rain: 80 },
-  { day: 'Thu', icon: CloudRain, high: 24, low: 18, condition: 'Heavy Rain', rain: 90 },
-  { day: 'Fri', icon: Cloud, high: 25, low: 18, condition: 'Overcast', rain: 40 },
-  { day: 'Sat', icon: CloudSun, high: 28, low: 19, condition: 'Partly Cloudy', rain: 20 },
-  { day: 'Sun', icon: Sun, high: 31, low: 20, condition: 'Sunny', rain: 5 },
-];
-
 export default function Weather() {
+  const { t } = useLanguage();
+
+  const forecast = [
+    { day: t('today'), icon: Sun, high: 32, low: 21, condition: t('sunny'), rain: 5 },
+    { day: t('tomorrow'), icon: CloudSun, high: 30, low: 20, condition: t('partlyCloudy'), rain: 15 },
+    { day: t('Wed'), icon: CloudRain, high: 26, low: 19, condition: t('rain'), rain: 80 },
+    { day: t('Thu'), icon: CloudRain, high: 24, low: 18, condition: t('heavyRain'), rain: 90 },
+    { day: t('Fri'), icon: Cloud, high: 25, low: 18, condition: t('overcast'), rain: 40 },
+    { day: t('Sat'), icon: CloudSun, high: 28, low: 19, condition: t('partlyCloudy'), rain: 20 },
+    { day: t('Sun'), icon: Sun, high: 31, low: 20, condition: t('sunny'), rain: 5 },
+  ];
+
   return (
     <div className="space-y-6">
       {/* Header */}
       <div>
-        <h2 className="text-3xl font-[family-name:var(--font-display)] text-earth-900">Weather Forecast</h2>
-        <p className="text-earth-500 mt-1">7-day forecast and agricultural weather insights</p>
+        <h2 className="text-3xl font-[family-name:var(--font-display)] text-earth-900">{t('weatherForecast')}</h2>
+        <p className="text-earth-500 mt-1">{t('weatherSub')}</p>
       </div>
 
       {/* Current Weather */}
@@ -37,29 +40,29 @@ export default function Weather() {
         animate={{ opacity: 1, y: 0 }}
         className="relative rounded-2xl overflow-hidden"
       >
-        <img src="/images/wheat-field.jpg" alt="" className="w-full h-64 object-cover" />
+        <img src="/images/crop_field_real.png" alt="" className="w-full h-64 object-cover" />
         <div className="absolute inset-0 bg-gradient-to-t from-earth-900/90 via-earth-900/40 to-transparent" />
         <div className="absolute bottom-0 left-0 right-0 p-6">
           <div className="flex items-end justify-between">
             <div>
-              <p className="text-earth-200 text-sm">Current Weather • Green Valley Farm</p>
+              <p className="text-earth-200 text-sm">{t('currentWeather')} • {t('GreenValleyFarm')}</p>
               <div className="flex items-center gap-4 mt-2">
                 <Sun className="text-sun-300" size={48} />
                 <div>
                   <p className="text-5xl font-bold text-white font-[family-name:var(--font-display)]">28°C</p>
-                  <p className="text-earth-200">Partly Cloudy</p>
+                  <p className="text-earth-200">{t('partlyCloudy')}</p>
                 </div>
               </div>
             </div>
             <div className="grid grid-cols-2 gap-4">
               <div className="text-center">
                 <Sunrise className="text-sun-300 mx-auto" size={20} />
-                <p className="text-xs text-earth-300 mt-1">Sunrise</p>
+                <p className="text-xs text-earth-300 mt-1">{t('sunrise')}</p>
                 <p className="text-sm font-semibold text-white">6:12 AM</p>
               </div>
               <div className="text-center">
                 <Sunset className="text-orange-400 mx-auto" size={20} />
-                <p className="text-xs text-earth-300 mt-1">Sunset</p>
+                <p className="text-xs text-earth-300 mt-1">{t('sunset')}</p>
                 <p className="text-sm font-semibold text-white">5:48 PM</p>
               </div>
             </div>
@@ -70,10 +73,10 @@ export default function Weather() {
       {/* Weather Details */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         {[
-          { icon: Thermometer, label: 'Feels Like', value: '31°C', color: 'text-danger' },
-          { icon: Droplets, label: 'Humidity', value: '65%', color: 'text-sky-500' },
-          { icon: Wind, label: 'Wind Speed', value: '12 km/h', color: 'text-earth-500' },
-          { icon: Eye, label: 'Visibility', value: '10 km', color: 'text-leaf-500' },
+          { icon: Thermometer, label: t('feelsLike'), value: '31°C', color: 'text-danger' },
+          { icon: Droplets, label: t('humidity'), value: '65%', color: 'text-sky-500' },
+          { icon: Wind, label: t('windSpeed'), value: '12 km/h', color: 'text-earth-500' },
+          { icon: Eye, label: t('visibility'), value: '10 km', color: 'text-leaf-500' },
         ].map((item, i) => (
           <motion.div
             key={item.label}
@@ -96,7 +99,7 @@ export default function Weather() {
         transition={{ delay: 0.3 }}
         className="glass-card rounded-2xl p-6 border border-earth-200"
       >
-        <h3 className="font-[family-name:var(--font-display)] text-xl text-earth-800 mb-4">Hourly Temperature & Humidity</h3>
+        <h3 className="font-[family-name:var(--font-display)] text-xl text-earth-800 mb-4">{t('hourlyTempHum')}</h3>
         <ResponsiveContainer width="100%" height={250}>
           <AreaChart data={hourlyData}>
             <defs>
@@ -126,7 +129,7 @@ export default function Weather() {
         transition={{ delay: 0.4 }}
         className="glass-card rounded-2xl p-6 border border-earth-200"
       >
-        <h3 className="font-[family-name:var(--font-display)] text-xl text-earth-800 mb-4">7-Day Forecast</h3>
+        <h3 className="font-[family-name:var(--font-display)] text-xl text-earth-800 mb-4">{t('sevenDayForecast')}</h3>
         <div className="grid grid-cols-7 gap-2">
           {forecast.map((day, i) => {
             const Icon = day.icon;
@@ -142,7 +145,7 @@ export default function Weather() {
               >
                 <p className="text-xs font-medium text-earth-500">{day.day}</p>
                 <Icon size={24} className={`mx-auto my-2 ${
-                  day.condition.includes('Rain') ? 'text-sky-500' : day.condition.includes('Cloud') ? 'text-earth-400' : 'text-sun-500'
+                  day.condition.includes(t('rain')) ? 'text-sky-500' : day.condition.includes(t('partlyCloudy')) ? 'text-earth-400' : 'text-sun-500'
                 }`} />
                 <p className="text-sm font-bold text-earth-800">{day.high}°</p>
                 <p className="text-xs text-earth-400">{day.low}°</p>
@@ -163,12 +166,12 @@ export default function Weather() {
         transition={{ delay: 0.5 }}
         className="rounded-2xl p-6 leaf-gradient text-white"
       >
-        <h3 className="font-[family-name:var(--font-display)] text-xl mb-3">🌾 Agricultural Weather Advisory</h3>
+        <h3 className="font-[family-name:var(--font-display)] text-xl mb-3">🌾 {t('agriWeatherAdvisory')}</h3>
         <div className="space-y-2 text-sm text-leaf-100">
-          <p>• <strong className="text-white">Irrigation:</strong> Reduce irrigation by 50% ahead of expected rainfall on Wednesday-Thursday.</p>
-          <p>• <strong className="text-white">Spraying:</strong> Complete any pending pesticide applications before Tuesday evening.</p>
-          <p>• <strong className="text-white">Harvesting:</strong> Expedite harvesting of mature soybeans before the rain event.</p>
-          <p>• <strong className="text-white">Drainage:</strong> Ensure field drainage channels are clear to handle 80-120mm of expected rainfall.</p>
+          <p>• <strong className="text-white">{t('irrigation')}:</strong> {t('irrigationAdvice')}</p>
+          <p>• <strong className="text-white">{t('spraying')}:</strong> {t('sprayingAdvice')}</p>
+          <p>• <strong className="text-white">{t('harvesting')}:</strong> {t('harvestingAdvice')}</p>
+          <p>• <strong className="text-white">{t('drainage')}:</strong> {t('drainageAdvice')}</p>
         </div>
       </motion.div>
     </div>

@@ -63,6 +63,8 @@ interface FarmState {
   toggleCommandPalette: () => void;
   setDomain: (domain: 'AgriTech' | 'FinTech' | 'Health' | 'EdTech' | 'Civic') => void;
   addActivity: (activity: { user: string; location: string; action: string }) => void;
+  pendingChatQuery: string | null;
+  setPendingChatQuery: (query: string | null) => void;
 }
 
 const mockAdvisories: Advisory[] = [
@@ -189,6 +191,7 @@ export const useFarmStore = create<FarmState>((set) => ({
   isPanelOpen: false,
   isCommandPaletteOpen: false,
   currentDomain: 'AgriTech',
+  pendingChatQuery: null,
   activityFeed: [
     { id: '1', user: 'Amit Patel', location: 'Ahmedabad, GJ', time: '2m ago', action: 'Uploaded soil report' },
     { id: '2', user: 'Suresh Raina', location: 'Meerut, UP', time: '5m ago', action: 'Requested crop advice' },
@@ -212,4 +215,5 @@ export const useFarmStore = create<FarmState>((set) => ({
   addActivity: (activity) => set((state) => ({
     activityFeed: [{ id: Date.now().toString(), ...activity, time: 'Just now' }, ...state.activityFeed].slice(0, 5)
   })),
+  setPendingChatQuery: (query) => set({ pendingChatQuery: query }),
 }));

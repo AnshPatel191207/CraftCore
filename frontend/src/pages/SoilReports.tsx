@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useDropzone } from 'react-dropzone';
 import { useFarmStore } from '../store/farmStore';
 import { fadeUp } from '../lib/utils';
+import { useLanguage } from '../components/ui/LanguageSwitcher';
 import type { SoilReport } from '../store/farmStore';
 import { RadialBarChart, RadialBar, ResponsiveContainer, PolarAngleAxis } from 'recharts';
 
@@ -26,22 +27,23 @@ function HealthGauge({ score }: { score: number }) {
 
 function NutrientBar({ label, value, max, unit, icon: Icon, color }: { label: string; value: number; max: number; unit: string; icon: any; color: string }) {
   const pct = Math.min((value / max) * 100, 100);
+  const { t } = useLanguage();
   return (
     <div className="space-y-1">
       <div className="flex items-center justify-between text-sm">
         <div className="flex items-center gap-2">
           <Icon size={14} className={color} />
-          <span className="text-earth-600 font-medium">{label}</span>
+          <span className="text-earth-600 font-medium">{t(label) || label}</span>
         </div>
-        <span className="font-semibold text-earth-800">{value} {unit}</span>
+        <span className="font-semibold text-earth-800">{value} {t(unit) || unit}</span>
       </div>
       <div className="h-2.5 bg-earth-200 rounded-full overflow-hidden">
         <motion.div
-          initial={{ width: 0 }}
-          animate={{ width: `${pct}%` }}
-          transition={{ duration: 1, delay: 0.3 }}
-          className="h-full rounded-full"
-          style={{ background: pct > 70 ? '#3a9140' : pct > 40 ? '#f99b07' : '#dc2626' }}
+            initial={{ width: 0 }}
+            animate={{ width: `${pct}%` }}
+            transition={{ duration: 1, delay: 0.3 }}
+            className="h-full rounded-full"
+            style={{ background: pct > 70 ? '#3a9140' : pct > 40 ? '#f99b07' : '#dc2626' }}
         />
       </div>
     </div>
@@ -49,6 +51,7 @@ function NutrientBar({ label, value, max, unit, icon: Icon, color }: { label: st
 }
 
 function ReportDetail({ report }: { report: SoilReport }) {
+  const { t } = useLanguage();
   if (!report.results) return null;
   const r = report.results;
 
@@ -63,28 +66,28 @@ function ReportDetail({ report }: { report: SoilReport }) {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {/* Health Score */}
           <div className="flex flex-col items-center">
-            <p className="text-sm font-medium text-earth-500 mb-2">Soil Health Score</p>
+            <p className="text-sm font-medium text-earth-500 mb-2">{t('healthIndex')}</p>
             <HealthGauge score={r.healthScore} />
-            <p className="text-xs text-earth-400 mt-1">{r.texture} Soil • pH {r.ph}</p>
+            <p className="text-xs text-earth-400 mt-1">{t(r.texture) || r.texture} {t('soil')} • pH {r.ph}</p>
           </div>
 
           {/* Nutrients */}
           <div className="space-y-4">
-            <p className="text-sm font-medium text-earth-500">Nutrient Levels</p>
-            <NutrientBar label="Nitrogen (N)" value={r.nitrogen} max={400} unit="kg/ha" icon={Leaf} color="text-leaf-500" />
-            <NutrientBar label="Phosphorus (P)" value={r.phosphorus} max={50} unit="kg/ha" icon={FlaskConical} color="text-sky-500" />
-            <NutrientBar label="Potassium (K)" value={r.potassium} max={300} unit="kg/ha" icon={Beaker} color="text-sun-500" />
-            <NutrientBar label="Organic Matter" value={r.organicMatter} max={6} unit="%" icon={Droplets} color="text-earth-500" />
+            <p className="text-sm font-medium text-earth-500">{t('nutrientLevels')}</p>
+            <NutrientBar label="nitrogen" value={r.nitrogen} max={400} unit="kg/ha" icon={Leaf} color="text-leaf-500" />
+            <NutrientBar label="phosphorus" value={r.phosphorus} max={50} unit="kg/ha" icon={FlaskConical} color="text-sky-500" />
+            <NutrientBar label="potassium" value={r.potassium} max={300} unit="kg/ha" icon={Beaker} color="text-sun-500" />
+            <NutrientBar label="organicMatter" value={r.organicMatter} max={6} unit="%" icon={Droplets} color="text-earth-500" />
           </div>
 
           {/* Recommendations */}
           <div>
-            <p className="text-sm font-medium text-earth-500 mb-3">Recommendations</p>
+            <p className="text-sm font-medium text-earth-500 mb-3">{t('recs')}</p>
             <div className="space-y-2">
               {r.recommendations.map((rec, i) => (
                 <div key={i} className="flex gap-2 text-xs text-earth-600 bg-earth-50 p-2.5 rounded-lg">
                   <CheckCircle size={14} className="text-leaf-500 shrink-0 mt-0.5" />
-                  <span>{rec}</span>
+                  <span>{t(rec.replace(/\s/g, '').replace(/[.-]/g, '')) || rec}</span>
                 </div>
               ))}
             </div>
@@ -97,6 +100,7 @@ function ReportDetail({ report }: { report: SoilReport }) {
 
 export default function SoilReports() {
   const { soilReports, addSoilReport, updateSoilReport } = useFarmStore();
+  const { t } = useLanguage();
   const [expandedId, setExpandedId] = useState<string | null>(null);
 
   const simulateAnalysis = useCallback((id: string) => {
@@ -146,8 +150,8 @@ export default function SoilReports() {
     <div className="space-y-6">
       {/* Header */}
       <motion.div variants={fadeUp}>
-        <h1 className="text-4xl font-display font-bold text-earth-900 tracking-tight">Soil Intelligence</h1>
-        <p className="text-earth-500 mt-2 font-medium">Upload soil test reports for AI-powered analysis and recommendations</p>
+        <h1 className="text-4xl font-display font-bold text-earth-900 tracking-tight">{t('soilAnalysisPortal')}</h1>
+        <p className="text-earth-500 mt-2 font-medium">{t('soilAnalysisPortalSub')}</p>
       </motion.div>
 
       {/* Upload Zone */}
@@ -169,23 +173,23 @@ export default function SoilReports() {
             <Upload className={isDragActive ? 'text-leaf-500' : 'text-earth-500'} size={28} />
           </div>
           <p className="text-lg font-medium text-earth-700">
-            {isDragActive ? 'Drop your soil report here...' : 'Upload Soil Test Report'}
+            {isDragActive ? t('resultsFor') : t('uploadReport')}
           </p>
-          <p className="text-sm text-earth-400 mt-2">Drag & drop PDF or image files, or click to browse</p>
-          <p className="text-xs text-earth-300 mt-1">Supports: PDF, PNG, JPG • Max 10MB</p>
+          <p className="text-sm text-earth-400 mt-2">{t('dropPdf')}</p>
+          <p className="text-xs text-earth-300 mt-1">{t('supportsPdfJpeg')}</p>
+          <img 
+            src="/images/soil_test_real.png" 
+            alt="Soil Texture" 
+            className="w-full h-48 object-cover rounded-2xl border border-border mt-4"
+          />
         </div>
-        <img
-          src="/images/soil-texture.jpg"
-          alt=""
-          className="absolute inset-0 w-full h-full object-cover rounded-2xl opacity-5"
-        />
         </div>
       </motion.div>
 
       {/* Reports List */}
       <div className="space-y-4">
         <h3 className="font-[family-name:var(--font-display)] text-xl text-earth-800">
-          Analysis Results ({soilReports.length})
+          {t('resultsFor')} ({soilReports.length})
         </h3>
 
         <AnimatePresence>
@@ -214,7 +218,7 @@ export default function SoilReports() {
                     <FileText size={14} className="text-earth-400" />
                     <p className="font-medium text-earth-800 text-sm truncate">{report.fileName}</p>
                   </div>
-                  <p className="text-xs text-earth-400 mt-0.5">Uploaded: {report.uploadDate}</p>
+                  <p className="text-xs text-earth-400 mt-0.5">{t('uploadData')}: {report.uploadDate}</p>
                 </div>
                 <div className="flex items-center gap-3">
                   <span className={`text-xs font-medium px-3 py-1 rounded-full ${
@@ -224,7 +228,7 @@ export default function SoilReports() {
                       ? 'bg-sun-100 text-sun-700'
                       : 'bg-red-100 text-danger'
                   }`}>
-                    {report.status === 'complete' ? 'Analysis Complete' : report.status === 'processing' ? 'Processing...' : 'Error'}
+                    {report.status === 'complete' ? t('active') : report.status === 'processing' ? t('live') : t('error')}
                   </span>
                   {report.status === 'complete' && (
                     <button

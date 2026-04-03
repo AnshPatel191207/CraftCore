@@ -173,10 +173,10 @@ export function CommandPalette({ isOpen, setIsOpen }: CommandPaletteProps) {
                 Navigate
               </span>
             </div>
-            <div className="flex items-center gap-2">
-                <span className="w-1.5 h-1.5 rounded-full bg-teal-500 animate-pulse" />
-                <p className="text-[10px] font-black text-teal-500 uppercase tracking-[0.2em]">AgriSense OS v1.0 • Secure</p>
-            </div>
+                <div className="flex items-center gap-2 px-4 py-2 border-b border-white/5 bg-white/[0.02]">
+                  <div className="w-1.5 h-1.5 rounded-full bg-teal-500 animate-pulse" />
+                  <span className="text-[10px] font-black text-teal-500 uppercase tracking-widest">KrishiSetu Intelligence Command</span>
+                </div>
           </div>
         </motion.div>
       </div>

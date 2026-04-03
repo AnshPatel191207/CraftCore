@@ -1,10 +1,11 @@
-import { Sprout, TrendingUp, AlertTriangle, Calendar, ChevronRight, LayoutDashboard, Globe } from 'lucide-react';
+import { Sprout, TrendingUp, AlertTriangle, Calendar, ChevronRight, LayoutDashboard, Globe, MapPin, Target } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar } from 'recharts';
 import StatCard from '../components/StatCard';
 import { useFarmStore } from '../store/farmStore';
 import { BentoGrid } from '../components/sections/BentoGrid';
 import { fadeUp, staggerContainer } from '../lib/animations';
+import { useLanguage } from '../components/ui/LanguageSwitcher';
 
 const yieldData = [
   { month: 'Aug', yield: 2.1 },
@@ -49,9 +50,10 @@ function CircleGauge({ value }: { value: number }) {
 }
 
 export default function Dashboard() {
-  const { crops, advisories, farmName, totalAcres, currentDomain } = useFarmStore();
+  const { crops, advisories, farmName, totalAcres, currentDomain, setPanelOpen } = useFarmStore();
+  const { t } = useLanguage();
   const avgHealth = Math.round(crops.reduce((a, c) => a + c.health, 0) / crops.length);
-  const unreadAlerts = advisories.filter((a) => !a.isRead).length;
+  const criticalAdvisories = advisories.filter((a) => a.severity === 'critical');
 
   return (
     <motion.div 
@@ -65,22 +67,22 @@ export default function Dashboard() {
         <motion.div variants={fadeUp}>
           <div className="flex items-center gap-2 mb-2">
             <LayoutDashboard size={18} className="text-teal-500" />
-            <span className="text-[10px] font-black text-teal-500 uppercase tracking-[0.2em]">{currentDomain} Intelligence</span>
+            <span className="text-[10px] font-black text-teal-500 uppercase tracking-[0.2em]">{currentDomain} {t('intelligence')}</span>
           </div>
-          <h1 className="text-4xl font-display font-black text-text tracking-tight">Main Command</h1>
+          <h1 className="text-4xl font-display font-black text-text tracking-tight">{t('mainCommand')}</h1>
           <div className="flex items-center gap-3 mt-2 text-text-muted font-bold">
             <span className="flex items-center gap-1.5 px-3 py-1 glass border border-border rounded-lg text-[10px] uppercase tracking-wider italic">
-              {farmName}
+              {t(farmName.replace(/\s/g, '')) || farmName}
             </span>
             <span className="w-1 h-1 bg-teal-500/50 rounded-full" />
-            <span className="text-[10px] font-black uppercase tracking-[0.2em]">{totalAcres} ac TOTAL AREA</span>
+            <span className="text-[10px] font-black uppercase tracking-[0.2em]">{totalAcres} {t('ac')} {t('totalArea')}</span>
           </div>
         </motion.div>
         
         <motion.div variants={fadeUp} className="flex items-center gap-3">
           <div className="px-4 py-2 rounded-xl glass border border-teal-dim flex items-center gap-2 group cursor-pointer hover:border-teal-500/40 transition-all">
             <Globe size={14} className="text-teal-500" />
-            <span className="text-xs font-black text-text uppercase tracking-widest">Global Sync</span>
+            <span className="text-xs font-black text-text uppercase tracking-widest">{t('globalSync')}</span>
             <span className="w-2 h-2 rounded-full bg-teal-500 animate-pulse" />
           </div>
           <div className="p-2.5 glass border border-border rounded-xl cursor-pointer hover:bg-teal-dim transition-colors">
@@ -104,13 +106,13 @@ export default function Dashboard() {
             <span className="animate-ping absolute inline-flex h-full w-full rounded-full opacity-75 bg-teal-500" />
             <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-teal-500" />
           </span>
-          <span style={{ color: 'var(--teal-500)' }}>Live</span>
+          <span style={{ color: 'var(--teal-500)' }}>{t('live')}</span>
         </div>
         <span className="opacity-20">|</span>
-        <span>Receiving live sensor data from <strong className="text-text">Main Hub</strong></span>
+        <span>{t('receivingLiveSensorData')} <strong className="text-text">{t('mainHub')}</strong></span>
         <span className="hidden sm:inline-flex items-center gap-1.5">
           <span className="opacity-20">|</span>
-          <span>Sync frequency: 500ms</span>
+          <span>{t('syncFrequency')}: 500ms</span>
         </span>
       </motion.div>
 
@@ -125,15 +127,16 @@ export default function Dashboard() {
       >
         <div className="absolute inset-0 shimmer opacity-10" />
         
-        <div className="absolute inset-0 flex items-center justify-center opacity-5 group-hover:opacity-10 transition-opacity z-0 pointer-events-none">
-            <Sprout size={320} className="text-teal-500 translate-x-1/4" />
+        <div className="absolute inset-0 z-0 opacity-40">
+           <img src="/images/dashboard_field_real.png" alt="" className="w-full h-full object-cover" />
         </div>
+        <div className="absolute inset-0 bg-gradient-to-r from-bg via-bg/40 to-transparent z-0 pointer-events-none" />
 
         {/* LEFT COLUMN: Season + Title + Subtitle */}
         <div className="flex-1 min-w-0 flex flex-col gap-4 relative z-10">
           <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-teal-500/10 backdrop-blur-md rounded-full border border-teal-500/20 max-w-fit">
             <Sprout size={14} className="text-teal-500" />
-            <span className="text-[10px] font-black text-teal-500 uppercase tracking-widest leading-none">Rabi Season Cycle • Active</span>
+            <span className="text-[10px] font-black text-teal-500 uppercase tracking-widest leading-none">{t('rabiSeasonCycle')} • {t('active')}</span>
           </div>
           
           <h2 
@@ -148,12 +151,12 @@ export default function Dashboard() {
               textOverflow: 'ellipsis'
             }}
           >
-            Critical Growth Phase Detected
+            {t('criticalGrowthPhase')}
           </h2>
           
           <p className="text-text-muted font-bold text-sm leading-relaxed max-w-lg">
-            Domain synced to <span className="text-text">{currentDomain || 'AgriTech'}</span>. 
-            Currently managing {crops.length} distinct fields with high target yield potential.
+            {t('domainSynced')} <span className="text-text">{t(currentDomain) || currentDomain}</span>. 
+            {t('currentlyManaging')} {crops.length} {t('distinctFields')} {t('withHighTarget')}.
           </p>
         </div>
 
@@ -161,7 +164,7 @@ export default function Dashboard() {
         <div className="hidden md:flex flex-shrink-0 w-[200px] flex-col items-center gap-3 relative z-10">
           <CircleGauge value={avgHealth} />
           <div className="text-center">
-            <p className="text-[10px] font-black text-text-muted uppercase tracking-widest mb-1">Avg Health Score</p>
+            <p className="text-[10px] font-black text-text-muted uppercase tracking-widest mb-1">{t('avgHealthScore')}</p>
             <div className="flex items-baseline justify-center gap-1">
               <span className="text-3xl font-display font-black text-teal-500">{avgHealth}</span>
               <span className="text-sm font-bold text-text-muted italic">%</span>
@@ -176,11 +179,36 @@ export default function Dashboard() {
       </motion.div>
 
       {/* Stats Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-        <StatCard title="Crop Health" value={`${avgHealth}%`} subtitle="System Nominal" icon={Sprout} color="teal" delay={0.1} trend={{ value: '+2.4%', isUp: true }} />
-        <StatCard title="Active Area" value={`${totalAcres} ac`} subtitle="Digital Mapping" icon={Globe} color="white" delay={0.2} />
-        <StatCard title="Yield Est." value="4.5 t/h" subtitle="Forecast Q1" icon={TrendingUp} color="amber" delay={0.3} trend={{ value: '18%', isUp: true }} />
-        <StatCard title="Priority Alerts" value={unreadAlerts} subtitle="Action Required" icon={AlertTriangle} color="amber" delay={0.4} />
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <StatCard 
+          title={t('cropHealth')}
+          value={`${avgHealth}%`}
+          subtitle={t('systemNominal')}
+          icon={TrendingUp}
+          color="teal"
+        />
+        <StatCard 
+          title={t('activeArea')}
+          value={`${totalAcres} ac`}
+          subtitle={t('digitalMapping')}
+          icon={MapPin}
+          color="sky"
+        />
+        <StatCard 
+          title={t('yieldEst')}
+          value="4.5 t/h"
+          subtitle={t('forecastQ1')}
+          icon={Target}
+          color="amber"
+        />
+        <StatCard 
+          title={t('priorityAlerts')}
+          value={criticalAdvisories.length}
+          subtitle={t('actionRequired')}
+          icon={AlertTriangle}
+          color="white"
+          delay={0.3}
+        />
       </div>
 
       {/* Main Bento Grid Component Integration */}
@@ -194,15 +222,15 @@ export default function Dashboard() {
           className="glass rounded-[32px] p-8 border border-white/5 relative overflow-hidden group"
         >
           <div className="flex justify-between items-center mb-10">
-            <div>
+             <div>
               <div className="flex items-center gap-2 mb-1">
                  <TrendingUp size={14} className="text-teal-500" />
-                 <h3 className="font-display text-xl text-text font-black tracking-tight">Yield Projection</h3>
+                 <h3 className="font-display text-xl text-text font-black tracking-tight">{t('yieldProjection')}</h3>
               </div>
-              <p className="text-[10px] text-text-muted font-black uppercase tracking-widest">Multi-month AI Analysis</p>
+              <p className="text-[10px] text-text-muted font-black uppercase tracking-widest">{t('multiMonthAIAnalysis')}</p>
             </div>
             <button className="px-4 py-2 rounded-xl glass border border-border text-[10px] font-black text-text-muted uppercase transition-all hover:border-teal-500/30 hover:text-text">
-                Detailed Log
+                {t('detailedLog')}
             </button>
           </div>
           <ResponsiveContainer width="100%" height={300}>
@@ -233,9 +261,9 @@ export default function Dashboard() {
             <div>
                <div className="flex items-center gap-2 mb-1">
                  <div className="w-2 h-2 rounded-full bg-teal-500" />
-                 <h3 className="font-display text-xl text-text font-black tracking-tight">Resource Cycles</h3>
+                 <h3 className="font-display text-xl text-text font-black tracking-tight">{t('resourceCycles')}</h3>
               </div>
-              <p className="text-[10px] text-text-muted font-black uppercase tracking-widest">Precipitation & Sync Index</p>
+              <p className="text-[10px] text-text-muted font-black uppercase tracking-widest">{t('precipitationSyncIndex')}</p>
             </div>
           </div>
           <ResponsiveContainer width="100%" height={300}>
@@ -262,12 +290,15 @@ export default function Dashboard() {
             <Globe size={180} />
         </div>
         <div className="relative z-10 text-center md:text-left">
-          <h3 className="text-2xl font-display font-black text-text mb-2">Grow Smarter with AI Advisor</h3>
-          <p className="text-text-muted font-bold max-w-md">Get personalized yield optimization strategies based on your unique soil profile.</p>
+          <h3 className="text-2xl font-display font-black text-text mb-2">{t('growSmarterWithAI')}</h3>
+          <p className="text-text-muted font-bold max-w-md">{t('getPersonalizedYield')}</p>
         </div>
-        <button className="relative z-10 px-8 py-4 rounded-2xl bg-white text-bg font-black text-sm uppercase tracking-widest hover:scale-105 active:scale-95 transition-all shadow-xl flex items-center gap-2 group">
-          Open AI Advisor
-          <ChevronRight size={18} className="group-hover:translate-x-1 transition-transform" />
+        <button 
+          onClick={() => setPanelOpen(true)}
+          className="relative z-10 px-8 py-4 rounded-2xl bg-teal-500 text-bg font-black text-sm uppercase tracking-widest hover:scale-105 active:scale-95 transition-all shadow-xl flex items-center gap-2 group"
+        >
+          {t('openAIAdvisor')}
+            <ChevronRight size={18} className="group-hover:translate-x-1 transition-transform" />
         </button>
       </motion.div>
     </motion.div>

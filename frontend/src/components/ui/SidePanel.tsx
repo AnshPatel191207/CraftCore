@@ -1,7 +1,7 @@
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, MessageSquare, Bot, Sparkles, Send, Trash2, ChevronRight, Zap } from 'lucide-react';
+import { X, Sparkles, Send, Zap, ChevronRight, Bot } from 'lucide-react';
 import { useFarmStore } from '../../store/farmStore';
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { cn } from '../../lib/utils';
 
 interface SidePanelProps {
@@ -10,11 +10,38 @@ interface SidePanelProps {
 }
 
 export function SidePanel({ isOpen, onClose }: SidePanelProps) {
-  const { currentDomain } = useFarmStore();
+  const { currentDomain, pendingChatQuery, setPendingChatQuery } = useFarmStore();
   const [messages, setMessages] = useState([
     { role: 'ai', content: `Hello! I am your ${currentDomain} Advisor. How can I help optimize your operations today?` }
   ]);
   const [input, setInput] = useState('');
+  const chatEndRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (isOpen && pendingChatQuery) {
+      const query = pendingChatQuery;
+      // Clear store query immediately
+      setPendingChatQuery(null);
+      
+      // Process the query
+      const userMsg = { role: 'user' as const, content: query };
+      setMessages(prev => [...prev, userMsg]);
+      
+      // Simulate AI response
+      setTimeout(() => {
+        setMessages(prev => [...prev, { 
+          role: 'ai', 
+          content: `Analyzing ${currentDomain} climate data for your request: "${query}"... Based on our Save Soil AI metrics, I recommend implementing cover cropping to sequester more carbon and using drip irrigation to maintain moisture level above 25%.` 
+        }]);
+      }, 1000);
+    }
+  }, [isOpen, pendingChatQuery, currentDomain, setPendingChatQuery]);
+
+  useEffect(() => {
+    if (chatEndRef.current) {
+      chatEndRef.current.scrollIntoView({ behavior: 'smooth' });
+    }
+  }, [messages]);
 
   const handleSend = () => {
     if (!input.trim()) return;
@@ -101,10 +128,11 @@ export function SidePanel({ isOpen, onClose }: SidePanelProps) {
                     {m.content}
                   </div>
                   <span className="text-[10px] font-black text-text-muted uppercase tracking-widest mt-2 px-1 opacity-50">
-                    {m.role === 'user' ? 'You' : 'AgriSense AI'} • {new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                    {m.role === 'user' ? 'You' : 'KrishiSetu AI'} • {new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                   </span>
                 </motion.div>
               ))}
+              <div ref={chatEndRef} />
             </div>
 
             {/* Recommended Prompts */}
@@ -149,7 +177,7 @@ export function SidePanel({ isOpen, onClose }: SidePanelProps) {
                     <span>Turbo Sync Active</span>
                  </div>
                  <div className="w-1 h-1 bg-white/20 rounded-full" />
-                 <span>CraftCore AI Engine v4</span>
+                 <span>KrishiSetu AI Engine v4</span>
               </div>
             </div>
           </motion.div>

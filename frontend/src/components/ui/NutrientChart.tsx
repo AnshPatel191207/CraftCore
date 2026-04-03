@@ -3,11 +3,13 @@ import { motion } from 'framer-motion';
 import { cn } from '../../lib/utils';
 import { useFarmStore } from '../../store/farmStore';
 import { StatusBadge } from './StatusBadge';
+import { useLanguage } from './LanguageSwitcher';
 
 export function NutrientChart() {
   const [mounted, setMounted] = useState(false);
   const [loading, setLoading] = useState(true);
   const { soilReports } = useFarmStore();
+  const { t } = useLanguage();
   const latestReport = soilReports[0]?.results;
 
   useEffect(() => {
@@ -20,11 +22,11 @@ export function NutrientChart() {
   if (!mounted || !latestReport) return <div className="h-64 bg-slate-900/50 animate-pulse rounded-[32px]" />;
 
   const params = [
-    { name: 'Nitrogen (N)', value: latestReport.nitrogen, optimal: 300, unit: 'kg/ha', color: '#10b981' },
-    { name: 'Phosphorus (P)', value: latestReport.phosphorus, optimal: 40, unit: 'kg/ha', color: '#f59e0b' },
-    { name: 'Potassium (K)', value: latestReport.potassium, optimal: 250, unit: 'kg/ha', color: '#10b981' },
-    { name: 'Organic Matter', value: latestReport.organicMatter, optimal: 4.5, unit: '%', color: '#10b981' },
-    { name: 'Moisture Level', value: latestReport.moisture, optimal: 35, unit: '%', color: '#0ea5e9' },
+    { name: t('soilMatrix.nitrogen'), value: latestReport.nitrogen, optimal: 300, unit: 'kg/ha', color: '#10b981' },
+    { name: t('soilMatrix.phosphorus'), value: latestReport.phosphorus, optimal: 40, unit: 'kg/ha', color: '#f59e0b' },
+    { name: t('soilMatrix.potassium'), value: latestReport.potassium, optimal: 250, unit: 'kg/ha', color: '#10b981' },
+    { name: t('soilMatrix.organicMatter'), value: latestReport.organicMatter, optimal: 4.5, unit: '%', color: '#10b981' },
+    { name: t('soilMatrix.moisture'), value: latestReport.moisture, optimal: 35, unit: '%', color: '#0ea5e9' },
   ];
 
   return (
@@ -33,11 +35,11 @@ export function NutrientChart() {
         <div className="flex items-center gap-3">
            <div className="w-1.5 h-6 bg-emerald-500 rounded-full" />
             <div>
-              <h3 className="text-xl font-display font-black tracking-tight" style={{ color: 'var(--text)' }}>Soil Nutrient Matrix</h3>
-              <p className="text-[10px] text-text-muted font-black uppercase tracking-widest mt-0.5 whitespace-nowrap">Real-time Lab Analysis • Live</p>
+              <h3 className="text-xl font-display font-black tracking-tight" style={{ color: 'var(--text)' }}>{t('soilMatrix.title')}</h3>
+              <p className="text-[10px] text-text-muted font-black uppercase tracking-widest mt-0.5 whitespace-nowrap">{t('soilMatrix.labAnalysis')}</p>
             </div>
          </div>
-         <StatusBadge status="info">Detailed Scan</StatusBadge>
+         <StatusBadge status="info">{t('soilMatrix.detailedScan')}</StatusBadge>
        </div>
        
        <div className="space-y-6">
@@ -83,3 +85,4 @@ export function NutrientChart() {
 }
 
 export default NutrientChart;
+
