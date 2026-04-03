@@ -48,11 +48,21 @@ interface FarmState {
   crops: CropData[];
   activePage: string;
   sidebarOpen: boolean;
+  isPanelOpen: boolean;
+  isCommandPaletteOpen: boolean;
+  currentDomain: 'AgriTech' | 'FinTech' | 'Health' | 'EdTech' | 'Civic';
+  activityFeed: { id: string; user: string; location: string; time: string; action: string }[];
   addSoilReport: (report: SoilReport) => void;
   updateSoilReport: (id: string, updates: Partial<SoilReport>) => void;
   markAdvisoryRead: (id: string) => void;
   setActivePage: (page: string) => void;
   toggleSidebar: () => void;
+  setPanelOpen: (open: boolean) => void;
+  togglePanel: () => void;
+  setCommandPaletteOpen: (open: boolean) => void;
+  toggleCommandPalette: () => void;
+  setDomain: (domain: 'AgriTech' | 'FinTech' | 'Health' | 'EdTech' | 'Civic') => void;
+  addActivity: (activity: { user: string; location: string; action: string }) => void;
 }
 
 const mockAdvisories: Advisory[] = [
@@ -176,6 +186,15 @@ export const useFarmStore = create<FarmState>((set) => ({
   crops: mockCrops,
   activePage: 'dashboard',
   sidebarOpen: false,
+  isPanelOpen: false,
+  isCommandPaletteOpen: false,
+  currentDomain: 'AgriTech',
+  activityFeed: [
+    { id: '1', user: 'Amit Patel', location: 'Ahmedabad, GJ', time: '2m ago', action: 'Uploaded soil report' },
+    { id: '2', user: 'Suresh Raina', location: 'Meerut, UP', time: '5m ago', action: 'Requested crop advice' },
+    { id: '3', user: 'Priya Singh', location: 'Patna, BR', time: '8m ago', action: 'Applied urea dosage' },
+    { id: '4', user: 'Venkatesh Iyer', location: 'Indore, MP', time: '12m ago', action: 'Updated field health' },
+  ],
   addSoilReport: (report) => set((state) => ({ soilReports: [report, ...state.soilReports] })),
   updateSoilReport: (id, updates) => set((state) => ({
     soilReports: state.soilReports.map((r) => r.id === id ? { ...r, ...updates } : r),
@@ -185,4 +204,12 @@ export const useFarmStore = create<FarmState>((set) => ({
   })),
   setActivePage: (page) => set({ activePage: page, sidebarOpen: false }),
   toggleSidebar: () => set((state) => ({ sidebarOpen: !state.sidebarOpen })),
+  setPanelOpen: (open) => set({ isPanelOpen: open }),
+  togglePanel: () => set((state) => ({ isPanelOpen: !state.isPanelOpen })),
+  setCommandPaletteOpen: (open) => set({ isCommandPaletteOpen: open }),
+  toggleCommandPalette: () => set((state) => ({ isCommandPaletteOpen: !state.isCommandPaletteOpen })),
+  setDomain: (domain) => set({ currentDomain: domain }),
+  addActivity: (activity) => set((state) => ({
+    activityFeed: [{ id: Date.now().toString(), ...activity, time: 'Just now' }, ...state.activityFeed].slice(0, 5)
+  })),
 }));

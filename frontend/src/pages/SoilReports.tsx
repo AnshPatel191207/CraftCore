@@ -3,6 +3,7 @@ import { Upload, FileText, CheckCircle, AlertCircle, Loader2, Beaker, Droplets, 
 import { motion, AnimatePresence } from 'framer-motion';
 import { useDropzone } from 'react-dropzone';
 import { useFarmStore } from '../store/farmStore';
+import { fadeUp } from '../lib/utils';
 import type { SoilReport } from '../store/farmStore';
 import { RadialBarChart, RadialBar, ResponsiveContainer, PolarAngleAxis } from 'recharts';
 
@@ -144,10 +145,10 @@ export default function SoilReports() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div>
-        <h2 className="text-3xl font-[family-name:var(--font-display)] text-earth-900">Soil Reports</h2>
-        <p className="text-earth-500 mt-1">Upload soil test reports for AI-powered analysis and recommendations</p>
-      </div>
+      <motion.div variants={fadeUp}>
+        <h1 className="text-4xl font-display font-bold text-earth-900 tracking-tight">Soil Intelligence</h1>
+        <p className="text-earth-500 mt-2 font-medium">Upload soil test reports for AI-powered analysis and recommendations</p>
+      </motion.div>
 
       {/* Upload Zone */}
       <motion.div

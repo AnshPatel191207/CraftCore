@@ -1,8 +1,10 @@
-import { Sprout, Droplets, TrendingUp, AlertTriangle, Sun, CloudRain, Wind, Thermometer } from 'lucide-react';
+import { Sprout, TrendingUp, AlertTriangle, Calendar, ChevronRight, LayoutDashboard, Globe } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar } from 'recharts';
 import StatCard from '../components/StatCard';
 import { useFarmStore } from '../store/farmStore';
+import { BentoGrid } from '../components/sections/BentoGrid';
+import { fadeUp, staggerContainer } from '../lib/animations';
 
 const yieldData = [
   { month: 'Aug', yield: 2.1 },
@@ -22,171 +24,252 @@ const rainfallData = [
   { month: 'Jan', rain: 45 },
 ];
 
+function CircleGauge({ value }: { value: number }) {
+  const r = 20;
+  const circumference = 2 * Math.PI * r;
+  const strokeDash = (value / 100) * circumference;
+  return (
+    <svg width="64" height="64" viewBox="0 0 52 52" className="drop-shadow-[0_0_8px_rgba(34,197,94,0.2)]">
+      <circle cx="26" cy="26" r={r} fill="none" 
+        stroke="var(--teal-dim)" strokeWidth="4" />
+      <motion.circle 
+        cx="26" cy="26" r={r} fill="none"
+        stroke="var(--teal-500)" strokeWidth="4"
+        initial={{ strokeDasharray: `0 ${circumference}` }}
+        animate={{ strokeDasharray: `${strokeDash} ${circumference}` }}
+        transition={{ duration: 1.5, ease: "easeOut" }}
+        strokeLinecap="round"
+        transform="rotate(-90 26 26)" />
+      <text x="26" y="30" textAnchor="middle" 
+        fontSize="10" fill="#22c55e" fontWeight="black" className="font-display">
+        {value}%
+      </text>
+    </svg>
+  );
+}
+
 export default function Dashboard() {
-  const { crops, advisories, farmName, totalAcres } = useFarmStore();
+  const { crops, advisories, farmName, totalAcres, currentDomain } = useFarmStore();
   const avgHealth = Math.round(crops.reduce((a, c) => a + c.health, 0) / crops.length);
   const unreadAlerts = advisories.filter((a) => !a.isRead).length;
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="relative rounded-3xl overflow-hidden h-52">
-        <img src="/images/farm-hero.jpg" alt="Farm" className="w-full h-full object-cover" />
-        <div className="absolute inset-0 bg-gradient-to-r from-earth-900/80 via-earth-800/60 to-transparent" />
-        <div className="absolute bottom-6 left-6">
-          <motion.h1
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            className="text-3xl md:text-4xl font-[family-name:var(--font-display)] text-white"
-          >
-            {farmName}
-          </motion.h1>
-          <motion.p
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ delay: 0.1 }}
-            className="text-earth-200 mt-1"
-          >
-            {totalAcres} acres • {crops.length} active crops • Season: Rabi
-          </motion.p>
+    <motion.div 
+      initial="hidden"
+      animate="visible"
+      variants={staggerContainer}
+      className="space-y-8 pb-12"
+    >
+      {/* Header Section */}
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
+        <motion.div variants={fadeUp}>
+          <div className="flex items-center gap-2 mb-2">
+            <LayoutDashboard size={18} className="text-teal-500" />
+            <span className="text-[10px] font-black text-teal-500 uppercase tracking-[0.2em]">{currentDomain} Intelligence</span>
+          </div>
+          <h1 className="text-4xl font-display font-black text-text tracking-tight">Main Command</h1>
+          <div className="flex items-center gap-3 mt-2 text-text-muted font-bold">
+            <span className="flex items-center gap-1.5 px-3 py-1 glass border border-border rounded-lg text-[10px] uppercase tracking-wider italic">
+              {farmName}
+            </span>
+            <span className="w-1 h-1 bg-teal-500/50 rounded-full" />
+            <span className="text-[10px] font-black uppercase tracking-[0.2em]">{totalAcres} ac TOTAL AREA</span>
+          </div>
+        </motion.div>
+        
+        <motion.div variants={fadeUp} className="flex items-center gap-3">
+          <div className="px-4 py-2 rounded-xl glass border border-teal-dim flex items-center gap-2 group cursor-pointer hover:border-teal-500/40 transition-all">
+            <Globe size={14} className="text-teal-500" />
+            <span className="text-xs font-black text-text uppercase tracking-widest">Global Sync</span>
+            <span className="w-2 h-2 rounded-full bg-teal-500 animate-pulse" />
+          </div>
+          <div className="p-2.5 glass border border-border rounded-xl cursor-pointer hover:bg-teal-dim transition-colors">
+            <Calendar className="w-5 h-5 text-text-muted" />
+          </div>
+        </motion.div>
+      </div>
+
+      {/* System Status Slim Bar */}
+      <motion.div
+        variants={fadeUp}
+        className="flex items-center gap-3 px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest"
+        style={{
+          background: 'var(--surface-2)',
+          border:     '1px solid var(--border)',
+          color:      'var(--text-muted)',
+        }}
+      >
+        <div className="flex items-center gap-1.5">
+          <span className="relative flex h-1.5 w-1.5">
+            <span className="animate-ping absolute inline-flex h-full w-full rounded-full opacity-75 bg-teal-500" />
+            <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-teal-500" />
+          </span>
+          <span style={{ color: 'var(--teal-500)' }}>Live</span>
         </div>
+        <span className="opacity-20">|</span>
+        <span>Receiving live sensor data from <strong className="text-text">Main Hub</strong></span>
+        <span className="hidden sm:inline-flex items-center gap-1.5">
+          <span className="opacity-20">|</span>
+          <span>Sync frequency: 500ms</span>
+        </span>
+      </motion.div>
+
+      {/* Hero Banner upgraded to match theme */}
+      <motion.div 
+        variants={fadeUp}
+        className="relative rounded-[32px] overflow-hidden min-h-[220px] shadow-lg shadow-black/20 group border transition-all duration-500 flex items-center justify-between gap-6 p-10"
+        style={{ 
+          background: 'var(--banner-bg)',
+          borderColor: 'var(--banner-border)'
+        }}
+      >
+        <div className="absolute inset-0 shimmer opacity-10" />
+        
+        <div className="absolute inset-0 flex items-center justify-center opacity-5 group-hover:opacity-10 transition-opacity z-0 pointer-events-none">
+            <Sprout size={320} className="text-teal-500 translate-x-1/4" />
+        </div>
+
+        {/* LEFT COLUMN: Season + Title + Subtitle */}
+        <div className="flex-1 min-w-0 flex flex-col gap-4 relative z-10">
+          <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-teal-500/10 backdrop-blur-md rounded-full border border-teal-500/20 max-w-fit">
+            <Sprout size={14} className="text-teal-500" />
+            <span className="text-[10px] font-black text-teal-500 uppercase tracking-widest leading-none">Rabi Season Cycle • Active</span>
+          </div>
+          
+          <h2 
+            className="text-text font-display font-bold"
+            style={{ 
+              fontSize: 'clamp(1.5rem, 5vw, 2.25rem)', 
+              lineHeight: '1.2',
+              display: '-webkit-box',
+              WebkitLineClamp: 2,
+              WebkitBoxOrient: 'vertical',
+              overflow: 'hidden',
+              textOverflow: 'ellipsis'
+            }}
+          >
+            Critical Growth Phase Detected
+          </h2>
+          
+          <p className="text-text-muted font-bold text-sm leading-relaxed max-w-lg">
+            Domain synced to <span className="text-text">{currentDomain || 'AgriTech'}</span>. 
+            Currently managing {crops.length} distinct fields with high target yield potential.
+          </p>
+        </div>
+
+        {/* RIGHT COLUMN: Gauge + Score */}
+        <div className="hidden md:flex flex-shrink-0 w-[200px] flex-col items-center gap-3 relative z-10">
+          <CircleGauge value={avgHealth} />
+          <div className="text-center">
+            <p className="text-[10px] font-black text-text-muted uppercase tracking-widest mb-1">Avg Health Score</p>
+            <div className="flex items-baseline justify-center gap-1">
+              <span className="text-3xl font-display font-black text-teal-500">{avgHealth}</span>
+              <span className="text-sm font-bold text-text-muted italic">%</span>
+            </div>
+          </div>
+        </div>
+        
+        {/* Floating Action Button (inside Right Column logic) */}
+        <button className="absolute top-6 right-6 w-12 h-12 rounded-xl glass flex items-center justify-center border-border hover:border-teal-500/30 hover:scale-105 transition-all text-text group z-10">
+          <TrendingUp className="group-hover:translate-y-[-2px] transition-transform w-5 h-5" />
+        </button>
+      </motion.div>
+
+      {/* Stats Grid */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+        <StatCard title="Crop Health" value={`${avgHealth}%`} subtitle="System Nominal" icon={Sprout} color="teal" delay={0.1} trend={{ value: '+2.4%', isUp: true }} />
+        <StatCard title="Active Area" value={`${totalAcres} ac`} subtitle="Digital Mapping" icon={Globe} color="white" delay={0.2} />
+        <StatCard title="Yield Est." value="4.5 t/h" subtitle="Forecast Q1" icon={TrendingUp} color="amber" delay={0.3} trend={{ value: '18%', isUp: true }} />
+        <StatCard title="Priority Alerts" value={unreadAlerts} subtitle="Action Required" icon={AlertTriangle} color="amber" delay={0.4} />
       </div>
 
-      {/* Stats */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <StatCard title="Crop Health" value={`${avgHealth}%`} subtitle="Average across all fields" icon={Sprout} color="leaf" delay={0.1} />
-        <StatCard title="Soil Moisture" value="28%" subtitle="Last reading 2h ago" icon={Droplets} color="sky" delay={0.2} />
-        <StatCard title="Yield Forecast" value="4.5 t/ha" subtitle="+12% vs last season" icon={TrendingUp} color="sun" delay={0.3} />
-        <StatCard title="Active Alerts" value={unreadAlerts} subtitle={`${advisories.length} total advisories`} icon={AlertTriangle} color="earth" delay={0.4} />
-      </div>
+      {/* Main Bento Grid Component Integration */}
+      <BentoGrid />
 
-      {/* Charts Row */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Yield Trend */}
+      {/* Analytics Visualization Row */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        {/* Yield Projection Chart */}
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.3 }}
-          className="glass-card rounded-2xl p-6 border border-earth-200"
+          variants={fadeUp}
+          className="glass rounded-[32px] p-8 border border-white/5 relative overflow-hidden group"
         >
-          <h3 className="font-[family-name:var(--font-display)] text-xl text-earth-800 mb-4">Yield Trend</h3>
-          <ResponsiveContainer width="100%" height={220}>
+          <div className="flex justify-between items-center mb-10">
+            <div>
+              <div className="flex items-center gap-2 mb-1">
+                 <TrendingUp size={14} className="text-teal-500" />
+                 <h3 className="font-display text-xl text-text font-black tracking-tight">Yield Projection</h3>
+              </div>
+              <p className="text-[10px] text-text-muted font-black uppercase tracking-widest">Multi-month AI Analysis</p>
+            </div>
+            <button className="px-4 py-2 rounded-xl glass border border-border text-[10px] font-black text-text-muted uppercase transition-all hover:border-teal-500/30 hover:text-text">
+                Detailed Log
+            </button>
+          </div>
+          <ResponsiveContainer width="100%" height={300}>
             <AreaChart data={yieldData}>
               <defs>
                 <linearGradient id="yieldGrad" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="#3a9140" stopOpacity={0.3} />
-                  <stop offset="95%" stopColor="#3a9140" stopOpacity={0} />
+                  <stop offset="5%" stopColor="#22c55e" stopOpacity={0.2} />
+                  <stop offset="95%" stopColor="#22c55e" stopOpacity={0} />
                 </linearGradient>
               </defs>
-              <CartesianGrid strokeDasharray="3 3" stroke="#e0cfb5" />
-              <XAxis dataKey="month" tick={{ fill: '#8d6347', fontSize: 12 }} />
-              <YAxis tick={{ fill: '#8d6347', fontSize: 12 }} />
+              <CartesianGrid strokeDasharray="3 3" stroke="rgba(255, 255, 255, 0.03)" vertical={false} />
+              <XAxis dataKey="month" tick={{ fill: '#7b9080', fontSize: 10, fontWeight: 800 }} axisLine={false} tickLine={false} />
+              <YAxis tick={{ fill: '#7b9080', fontSize: 10, fontWeight: 800 }} axisLine={false} tickLine={false} />
               <Tooltip
-                contentStyle={{ background: '#faf6f1', border: '1px solid #e0cfb5', borderRadius: '12px', fontFamily: 'Outfit' }}
+                contentStyle={{ background: 'var(--surface-2)', border: '1px solid var(--border)', borderRadius: '20px', boxShadow: 'var(--shadow-lg)', fontFamily: 'Outfit' }}
               />
-              <Area type="monotone" dataKey="yield" stroke="#3a9140" strokeWidth={2.5} fill="url(#yieldGrad)" />
+              <Area type="monotone" dataKey="yield" stroke="#22c55e" strokeWidth={4} fill="url(#yieldGrad)" dot={{ r: 4, fill: '#22c55e', strokeWidth: 2, stroke: '#111a13' }} activeDot={{ r: 6, fill: '#ffffff' }} />
             </AreaChart>
           </ResponsiveContainer>
         </motion.div>
 
-        {/* Rainfall */}
+        {/* Rainfall / Resource Chart */}
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.4 }}
-          className="glass-card rounded-2xl p-6 border border-earth-200"
+          variants={fadeUp}
+          className="glass rounded-[32px] p-8 border border-white/5 relative overflow-hidden group"
         >
-          <h3 className="font-[family-name:var(--font-display)] text-xl text-earth-800 mb-4">Monthly Rainfall (mm)</h3>
-          <ResponsiveContainer width="100%" height={220}>
+          <div className="flex justify-between items-center mb-10">
+            <div>
+               <div className="flex items-center gap-2 mb-1">
+                 <div className="w-2 h-2 rounded-full bg-teal-500" />
+                 <h3 className="font-display text-xl text-text font-black tracking-tight">Resource Cycles</h3>
+              </div>
+              <p className="text-[10px] text-text-muted font-black uppercase tracking-widest">Precipitation & Sync Index</p>
+            </div>
+          </div>
+          <ResponsiveContainer width="100%" height={300}>
             <BarChart data={rainfallData}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#e0cfb5" />
-              <XAxis dataKey="month" tick={{ fill: '#8d6347', fontSize: 12 }} />
-              <YAxis tick={{ fill: '#8d6347', fontSize: 12 }} />
+              <CartesianGrid strokeDasharray="3 3" stroke="rgba(255, 255, 255, 0.03)" vertical={false} />
+              <XAxis dataKey="month" tick={{ fill: '#7b9080', fontSize: 10, fontWeight: 800 }} axisLine={false} tickLine={false} />
+              <YAxis tick={{ fill: '#7b9080', fontSize: 10, fontWeight: 800 }} axisLine={false} tickLine={false} />
               <Tooltip
-                contentStyle={{ background: '#faf6f1', border: '1px solid #e0cfb5', borderRadius: '12px', fontFamily: 'Outfit' }}
+                cursor={{ fill: 'rgba(255, 255, 255, 0.02)' }}
+                contentStyle={{ background: 'var(--surface-2)', border: '1px solid var(--border)', borderRadius: '20px', fontFamily: 'Outfit' }}
               />
-              <Bar dataKey="rain" fill="#3b92f6" radius={[6, 6, 0, 0]} />
+              <Bar dataKey="rain" fill="#22c55e" radius={[8, 8, 8, 8]} barSize={32} />
             </BarChart>
           </ResponsiveContainer>
         </motion.div>
       </div>
 
-      {/* Weather + Crops Quick View */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Weather Widget */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.5 }}
-          className="glass-card rounded-2xl p-6 border border-earth-200"
-        >
-          <h3 className="font-[family-name:var(--font-display)] text-xl text-earth-800 mb-4">Today's Weather</h3>
-          <div className="flex items-center gap-4 mb-4">
-            <div className="w-16 h-16 rounded-2xl sun-gradient flex items-center justify-center">
-              <Sun className="text-white" size={32} />
-            </div>
-            <div>
-              <p className="text-4xl font-bold text-earth-900 font-[family-name:var(--font-display)]">28°C</p>
-              <p className="text-sm text-earth-500">Partly Cloudy</p>
-            </div>
-          </div>
-          <div className="grid grid-cols-3 gap-3">
-            <div className="text-center p-3 bg-earth-100/50 rounded-xl">
-              <CloudRain size={18} className="mx-auto text-sky-500 mb-1" />
-              <p className="text-xs text-earth-500">Humidity</p>
-              <p className="text-sm font-semibold text-earth-800">65%</p>
-            </div>
-            <div className="text-center p-3 bg-earth-100/50 rounded-xl">
-              <Wind size={18} className="mx-auto text-earth-500 mb-1" />
-              <p className="text-xs text-earth-500">Wind</p>
-              <p className="text-sm font-semibold text-earth-800">12 km/h</p>
-            </div>
-            <div className="text-center p-3 bg-earth-100/50 rounded-xl">
-              <Thermometer size={18} className="mx-auto text-danger mb-1" />
-              <p className="text-xs text-earth-500">Feels Like</p>
-              <p className="text-sm font-semibold text-earth-800">31°C</p>
-            </div>
-          </div>
-        </motion.div>
-
-        {/* Crop Status */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.6 }}
-          className="glass-card rounded-2xl p-6 border border-earth-200 lg:col-span-2"
-        >
-          <h3 className="font-[family-name:var(--font-display)] text-xl text-earth-800 mb-4">Crop Status</h3>
-          <div className="space-y-3">
-            {crops.map((crop) => (
-              <div key={crop.name} className="flex items-center gap-4 p-3 bg-earth-50/50 rounded-xl">
-                <div className="w-10 h-10 rounded-lg bg-leaf-100 flex items-center justify-center">
-                  <Sprout className="text-leaf-600" size={20} />
-                </div>
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center justify-between">
-                    <p className="font-medium text-earth-800 text-sm">{crop.name}</p>
-                    <span className="text-xs text-earth-500">{crop.area} acres</span>
-                  </div>
-                  <div className="flex items-center gap-3 mt-1">
-                    <div className="flex-1 h-2 bg-earth-200 rounded-full overflow-hidden">
-                      <div
-                        className="h-full rounded-full transition-all duration-1000"
-                        style={{
-                          width: `${crop.health}%`,
-                          background: crop.health > 80 ? '#3a9140' : crop.health > 60 ? '#f99b07' : '#dc2626',
-                        }}
-                      />
-                    </div>
-                    <span className="text-xs font-semibold text-earth-600 w-10 text-right">{crop.health}%</span>
-                  </div>
-                  <p className="text-xs text-earth-400 mt-0.5">Stage: {crop.stage}</p>
-                </div>
-              </div>
-            ))}
-          </div>
-        </motion.div>
-      </div>
-    </div>
+      {/* Footer CTA */}
+      <motion.div 
+        variants={fadeUp}
+        className="glass rounded-[32px] p-10 border border-border flex flex-col md:flex-row items-center justify-between gap-8 relative overflow-hidden"
+      >
+        <div className="absolute top-0 right-0 p-4 opacity-5 pointer-events-none">
+            <Globe size={180} />
+        </div>
+        <div className="relative z-10 text-center md:text-left">
+          <h3 className="text-2xl font-display font-black text-text mb-2">Grow Smarter with AI Advisor</h3>
+          <p className="text-text-muted font-bold max-w-md">Get personalized yield optimization strategies based on your unique soil profile.</p>
+        </div>
+        <button className="relative z-10 px-8 py-4 rounded-2xl bg-white text-bg font-black text-sm uppercase tracking-widest hover:scale-105 active:scale-95 transition-all shadow-xl flex items-center gap-2 group">
+          Open AI Advisor
+          <ChevronRight size={18} className="group-hover:translate-x-1 transition-transform" />
+        </button>
+      </motion.div>
+    </motion.div>
   );
 }

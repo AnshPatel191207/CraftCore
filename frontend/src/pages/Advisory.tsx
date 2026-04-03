@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { CloudRain, Bug, Sprout, FlaskConical, TrendingUp, ChevronDown, ChevronUp, CheckCircle2, AlertTriangle, AlertOctagon, Info } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useFarmStore } from '../store/farmStore';
+import { cn, fadeUp, staggerContainer } from '../lib/utils';
 import type { Advisory as AdvisoryType } from '../store/farmStore';
 
 const categoryConfig = {
@@ -19,7 +20,7 @@ const severityConfig = {
   critical: { icon: AlertOctagon, label: 'Critical', color: 'text-red-600 bg-red-50 border-red-200' },
 };
 
-function AdvisoryCard({ advisory, index }: { advisory: AdvisoryType; index: number }) {
+function AdvisoryCard({ advisory }: { advisory: AdvisoryType }) {
   const [expanded, setExpanded] = useState(false);
   const { markAdvisoryRead } = useFarmStore();
   const cat = categoryConfig[advisory.category];
@@ -34,44 +35,50 @@ function AdvisoryCard({ advisory, index }: { advisory: AdvisoryType; index: numb
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ delay: index * 0.08 }}
-      className={`glass-card rounded-2xl border overflow-hidden transition-all ${
-        !advisory.isRead ? 'border-sun-300 shadow-md shadow-sun-100/50' : 'border-earth-200'
-      }`}
+      variants={fadeUp}
+      className={cn(
+        "glass rounded-3xl border overflow-hidden transition-all duration-500 hover:shadow-xl hover:shadow-earth-900/5",
+        !advisory.isRead ? 'border-sun-300 shadow-lg shadow-sun-100/50 ring-1 ring-sun-500/10' : 'border-earth-100'
+      )}
     >
       <div
-        className="p-5 cursor-pointer hover:bg-earth-50/30 transition-colors"
+        className="p-6 cursor-pointer hover:bg-earth-50/50 transition-colors"
         onClick={handleExpand}
       >
         <div className="flex items-start gap-4">
-          <div className={`w-11 h-11 rounded-xl flex items-center justify-center shrink-0 ${cat.color.split(' ')[0]}`}>
-            <CatIcon className={cat.color.split(' ')[1]} size={22} />
+          <div className={cn(
+            "w-12 h-12 rounded-2xl flex items-center justify-center shrink-0 shadow-sm transition-transform duration-500",
+            expanded ? "scale-110" : "group-hover:scale-105",
+            cat.color.split(' ')[0]
+          )}>
+            <CatIcon className={cat.color.split(' ')[1]} size={24} />
           </div>
-          <div className="flex-1 min-w-0">
+          <div className="flex-1 min-w-0 pt-0.5">
             <div className="flex items-start justify-between gap-3">
               <div>
-                <div className="flex items-center gap-2 flex-wrap">
-                  <h4 className="font-semibold text-earth-800">{advisory.title}</h4>
+                <div className="flex items-center gap-2.5 flex-wrap">
+                  <h4 className="font-display font-bold text-lg text-earth-900 tracking-tight leading-tight">{advisory.title}</h4>
                   {!advisory.isRead && (
-                    <span className="w-2 h-2 rounded-full bg-sun-500 shrink-0" />
+                    <span className="flex h-2 w-2">
+                      <span className="animate-ping absolute inline-flex h-2 w-2 rounded-full bg-sun-500 opacity-75"></span>
+                      <span className="relative inline-flex rounded-full h-2 w-2 bg-sun-500"></span>
+                    </span>
                   )}
                 </div>
-                <div className="flex items-center gap-2 mt-1.5 flex-wrap">
-                  <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${cat.color}`}>{cat.label}</span>
-                  <span className={`text-xs font-medium px-2 py-0.5 rounded-full border ${sev.color}`}>
-                    <SevIcon size={10} className="inline mr-1" />
+                <div className="flex items-center gap-2.5 mt-2 flex-wrap">
+                  <span className={cn("text-[10px] font-bold px-2 py-1 rounded-lg uppercase tracking-widest leading-none border border-current opacity-70", cat.color)}>{cat.label}</span>
+                  <span className={cn("text-[10px] font-bold px-2 py-1 rounded-lg border uppercase tracking-widest leading-none", sev.color)}>
+                    <SevIcon size={10} className="inline mr-1.5 -mt-0.5" />
                     {sev.label}
                   </span>
-                  <span className="text-xs text-earth-400">{advisory.date}</span>
+                  <span className="text-[10px] font-bold text-earth-400 uppercase tracking-widest">{advisory.date}</span>
                 </div>
               </div>
-              <button className="p-1 shrink-0">
-                {expanded ? <ChevronUp size={18} className="text-earth-400" /> : <ChevronDown size={18} className="text-earth-400" />}
+              <button className="p-2 shrink-0 bg-earth-50 rounded-xl transition-colors hover:bg-earth-100">
+                {expanded ? <ChevronUp size={18} className="text-earth-600" /> : <ChevronDown size={18} className="text-earth-400" />}
               </button>
             </div>
-            <p className="text-sm text-earth-500 mt-2 line-clamp-2">{advisory.summary}</p>
+            <p className="text-sm text-earth-500 mt-3 font-medium leading-relaxed italic">{advisory.summary}</p>
           </div>
         </div>
       </div>
@@ -113,12 +120,17 @@ export default function Advisory() {
   const filtered = filter === 'all' ? advisories : advisories.filter((a) => a.category === filter);
 
   return (
-    <div className="space-y-6">
+    <motion.div 
+      initial="hidden"
+      animate="visible"
+      variants={staggerContainer}
+      className="space-y-8 pb-12"
+    >
       {/* Header */}
-      <div>
-        <h2 className="text-3xl font-[family-name:var(--font-display)] text-earth-900">Advisory Portal</h2>
-        <p className="text-earth-500 mt-1">Expert recommendations and alerts for your farm</p>
-      </div>
+      <motion.div variants={fadeUp}>
+        <h2 className="text-4xl font-display font-bold text-earth-900 tracking-tight">Advisory Portal</h2>
+        <p className="text-earth-500 mt-2 font-medium">Expert recommendations and alerts for your farm</p>
+      </motion.div>
 
       {/* Filters */}
       <div className="flex gap-2 flex-wrap">
@@ -162,8 +174,8 @@ export default function Advisory() {
 
       {/* Advisories List */}
       <div className="space-y-4">
-        {filtered.map((advisory, i) => (
-          <AdvisoryCard key={advisory.id} advisory={advisory} index={i} />
+        {filtered.map((advisory) => (
+          <AdvisoryCard key={advisory.id} advisory={advisory} />
         ))}
         {filtered.length === 0 && (
           <div className="text-center py-12 text-earth-400">
@@ -171,6 +183,6 @@ export default function Advisory() {
           </div>
         )}
       </div>
-    </div>
+    </motion.div>
   );
 }
