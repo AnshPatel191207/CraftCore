@@ -42,7 +42,7 @@ app.use(cookieParser());
 app.use(passport.initialize());
 
 // 3. API Rate Limiting
-app.use('/api/v1', generalLimiter);
+app.use('/api', generalLimiter);
 
 // 4. Health Check (Non-Rate Limited)
 app.get('/health', (req, res) => {
@@ -55,22 +55,22 @@ app.get('/health', (req, res) => {
 });
 
 // 5. Routing Layer
-app.use('/api/v1/auth', authRouter);
-app.use('/api/v1/soil-reports', soilRouter);
-app.use('/api/v1/advisories', advisoryRouter);
-app.use('/api/v1/crops', cropRouter);
-app.use('/api/v1/weather', weatherRouter);
-app.use('/api/v1/chat', chatRouter);
-app.use('/api/v1/dashboard', dashboardRouter);
-app.use('/api/v1/activities', activityRouter);
-app.use('/api/v1/domains', domainRouter);
-app.use('/api/v1/rag', ragRouter);
-app.use('/api', ragRouter); // Alias for /api/train and /api/ask
+app.use('/api/auth', authRouter);
+app.use('/api/soil-reports', soilRouter);
+app.use('/api/advisories', advisoryRouter);
+app.use('/api/crops', cropRouter);
+app.use('/api/weather', weatherRouter);
+app.use('/api/chat', chatRouter);
+app.use('/api/dashboard', dashboardRouter);
+app.use('/api/activities', activityRouter);
+app.use('/api/domains', domainRouter);
+app.use('/api/rag', ragRouter);
 
 // 6. 404 Handler
 app.use('*', (req, res) => {
     res.status(404).json({ 
         success: false, 
+        data: null,
         message: 'Endpoint not found', 
         code: 'NOT_FOUND' 
     });

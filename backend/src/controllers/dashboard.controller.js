@@ -32,11 +32,10 @@ const getStats = async (req, res, next) => {
         ]);
 
         const stats = {
-            cropHealth: cropAgg[0]?.avgHealth || 100,
+            cropHealth: Math.round(cropAgg[0]?.avgHealth || 100),
             activeArea: cropAgg[0]?.totalArea || 0,
-            activeCrops: cropAgg[0]?.count || 0,
-            unreadAlerts: unreadAdvisories,
-            soilScore: latestSoil?.results?.healthScore || 0
+            yieldEst: '4.5 t/ac', // Mocking yield for now
+            alerts: unreadAdvisories
         };
 
         formatSuccess(res, stats, 'Dashboard statistics fetched');

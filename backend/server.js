@@ -18,7 +18,11 @@ const start = async () => {
         // 1. Database Connection
         await connectDB();
 
-        // 2. HTTP and Socket.io Initialization
+        // 2. Database Initialization (Seeding)
+        const seedData = require('./src/config/dbInit');
+        await seedData();
+
+        // 3. HTTP and Socket.io Initialization
         const server = http.createServer(app);
         await initSocket(server);
 

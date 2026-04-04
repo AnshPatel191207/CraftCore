@@ -1,56 +1,55 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import {
-  Sprout, Terminal, Sun, Moon, Menu, X,
-  WifiOff, Database, FlaskConical, LogOut,
+  Sprout, Sun, Moon, Menu, X, Search,
+  LayoutDashboard, FileText,
+  TrendingUp, Lightbulb, CloudSun,
+  Leaf, LogOut
 } from 'lucide-react';
+import { useNavigate, useLocation, Link } from 'react-router-dom';
 import { useTheme } from '../../providers/ThemeProvider';
 import { useFarmStore } from '../../store/farmStore';
 import { useAuthStore } from '../../store/authStore';
-import DomainSwitcher from '../ui/DomainSwitcher';
 import { cn } from '../../lib/utils';
 import { motion, AnimatePresence } from 'framer-motion';
-
+import LanguageSwitcher from '../ui/LanguageSwitcher';
 
 const NAV_LINKS = [
-  { label: 'Dashboard',       id: 'dashboard' },
-  { label: 'Soil Reports',    id: 'soil'      },
-  { label: 'Advisory Portal', id: 'advisory'  },
-  { label: 'My Crops',        id: 'crops'     },
-  { label: 'Weather',         id: 'weather'   },
+  { label: 'Dashboard', path: '/app/dashboard', icon: LayoutDashboard },
+  { label: 'Soil Reports', path: '/app/soil', icon: FileText },
+  { label: 'Market', path: '/app/market', icon: TrendingUp },
+  { label: 'Advisory', path: '/app/advisory', icon: Lightbulb },
+  { label: 'Crops', path: '/app/crops', icon: Sprout },
+  { label: 'Weather', path: '/app/weather', icon: CloudSun },
+  { label: 'Save Soil', path: '/app/savesoil', icon: Leaf },
 ];
 
-
 export default function Topbar() {
-  const { activePage, setActivePage, setCommandPaletteOpen, isDemoMode, setDemoMode, farmName } = useFarmStore();
-  const { user, logout } = useAuthStore();
+  const navigate = useNavigate();
+  const location = useLocation();
+  const {
+    setCommandPaletteOpen,
+    isDemoMode,
+    setDemoMode,
+    farmName,
+  } = useFarmStore();
+
+  const { user, logout, isAuthenticated } = useAuthStore();
   const { theme, toggle } = useTheme();
   const [mobileOpen, setMobileOpen] = useState(false);
-  const [isOnline, setIsOnline] = useState(navigator.onLine);
-
-  useEffect(() => {
-    const handleOnline  = () => setIsOnline(true);
-    const handleOffline = () => setIsOnline(false);
-    window.addEventListener('online',  handleOnline);
-    window.addEventListener('offline', handleOffline);
-    return () => {
-      window.removeEventListener('online',  handleOnline);
-      window.removeEventListener('offline', handleOffline);
-    };
-  }, []);
-
 
   return (
-    <header
+    <motion.header
+      initial={{ y: -50, opacity: 0 }}
+      animate={{ y: 0, opacity: 1 }}
       className={cn(
-        'fixed top-0 left-0 right-0 z-50 h-14',
-        'flex items-center gap-2 px-4 sm:px-6',
-        'border-b border-border transition-all duration-300',
+        'fixed top-0 left-0 right-0 z-[60] h-16',
+        'flex items-center justify-between px-4 sm:px-6',
+        'backdrop-blur-lg bg-bg/85 border-b border-white/5',
+        'text-white transition-all duration-300'
       )}
-      style={{ background: 'var(--sidebar-bg)', backdropFilter: 'blur(8px)' }}
     >
-      {/* ── LEFT: Logo ── */}
-      <div
-        onClick={() => setActivePage('dashboard')}
+      <Link
+        to="/"
         className="flex items-center gap-2 mr-4 shrink-0 cursor-pointer group"
       >
         <div
@@ -64,227 +63,170 @@ export default function Topbar() {
             className="text-sm font-black tracking-tight text-text"
             style={{ fontFamily: 'var(--font-display)' }}
           >
-            AgriSense
+            KrishiSetu
           </span>
           <span className="text-[9px] font-black uppercase tracking-widest text-teal-500">
             {isDemoMode ? 'Demo Sandbox' : 'Live Intelligence'}
           </span>
         </div>
-      </div>
+      </Link>
 
-
-      {/* ── CENTER: Nav links (Desktop) ── */}
-      <nav className="hidden md:flex items-center gap-1 flex-1 overflow-x-auto scrollbar-none">
-        {NAV_LINKS.map(link => {
-          const active = activePage === link.id;
+      <nav className="hidden md:flex items-center gap-4 flex-1 justify-center max-w-5xl">
+        {NAV_LINKS.map((link) => {
+          const active = location.pathname === link.path;
+          const Icon = link.icon;
           return (
-            <button
-              key={link.id}
-              onClick={() => setActivePage(link.id)}
-              className={cn(
-                'relative flex items-center px-4 py-2 rounded-lg',
-                'text-[11px] font-black uppercase tracking-widest',
-                'transition-all duration-200',
-                active
-                  ? 'text-teal-500 bg-teal-500/10'
-                  : 'text-text-muted hover:bg-surface-2 hover:text-text'
-              )}
-            >
-              {link.label}
-              {active && (
-                <motion.div
-                  layoutId="active-nav"
-                  className="absolute bottom-0 left-2 right-2 h-0.5 bg-teal-500 rounded-full"
-                />
-              )}
-            </button>
+            <div key={link.path} className="relative group flex flex-col items-center">
+              <Link
+                to={link.path}
+                className={cn(
+                  'w-11 h-11 flex items-center justify-center rounded-xl transition-all duration-300 hover:scale-110 border border-transparent',
+                  active
+                    ? 'bg-teal-500/20 text-teal-500 border-teal-500/20 shadow-[0_0_15px_rgba(20,184,166,0.2)]'
+                    : 'text-text-muted hover:bg-white/5 hover:text-white'
+                )}
+              >
+                <Icon size={22} strokeWidth={active ? 2.5 : 2} />
+              </Link>
+              <div className="absolute -bottom-8 opacity-0 group-hover:opacity-100 group-hover:translate-y-1 transition-all duration-300 pointer-events-none">
+                <div className="bg-surface-3 text-white text-[10px] font-black uppercase tracking-widest px-3 py-1.5 rounded-lg border border-white/10 shadow-xl whitespace-nowrap">
+                  {link.label}
+                </div>
+              </div>
+            </div>
           );
         })}
       </nav>
 
-
-      {/* ── RIGHT: Controls ── */}
-      <div className="flex items-center gap-2 shrink-0 ml-auto">
-
-        {/* Domain Switcher */}
-        <div className="hidden lg:block">
-          <DomainSwitcher />
+      <div className="flex items-center gap-4 shrink-0 flex-1 lg:flex-none justify-end">
+        <div className="hover:scale-105 transition-all duration-300">
+          <LanguageSwitcher />
         </div>
 
-        {/* Demo Mode Toggle */}
-        <button
-          onClick={() => setDemoMode(!isDemoMode)}
-          className={cn(
-            'hidden lg:flex items-center gap-2 px-3 py-1.5 rounded-lg text-[9px] font-black uppercase tracking-widest border transition-all',
-            isDemoMode
-              ? 'bg-amber-500/10 border-amber-500/30 text-amber-500 hover:bg-amber-500/20'
-              : 'bg-surface-2 border-border text-text-muted hover:text-text'
-          )}
-          title={isDemoMode ? 'Switch to Live API' : 'Switch to Demo Mode'}
-        >
-          {isDemoMode ? <FlaskConical size={12} /> : <Database size={12} />}
-          {isDemoMode ? 'Demo Mode' : 'Live API'}
-        </button>
-
-        {/* Online / Offline Status */}
-        <div className={cn(
-          'hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[9px] font-black uppercase tracking-widest border',
-          isOnline
-            ? 'bg-teal-500/10 border-teal-500/20 text-teal-500'
-            : 'bg-error/10 border-error/20 text-error'
-        )}>
-          {isOnline ? (
-            <>
-              <span className="relative flex h-1.5 w-1.5">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full opacity-75 bg-teal-500" />
-                <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-teal-500" />
-              </span>
-              Live
-            </>
-          ) : (
-            <>
-              <WifiOff size={12} />
-              Offline
-            </>
-          )}
-        </div>
-
-        {/* ⌘K Command Palette */}
         <button
           onClick={() => setCommandPaletteOpen(true)}
-          className="flex items-center gap-2 px-3 py-2 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all hover:bg-surface-2"
-          style={{
-            background: 'var(--surface-2)',
-            border:     '1px solid var(--border)',
-            color:      'var(--text-muted)',
-          }}
-          title="Command Palette (Ctrl+K)"
+          className="group relative flex items-center gap-2.5 p-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all hover:bg-green-700/30 hover:shadow-[0_0_15px_rgba(34,197,94,0.1)] border border-white/5 active:scale-95"
+          style={{ background: 'var(--surface-2)' }}
+          title="Search / Command Palette (Ctrl+K)"
         >
-          <Terminal className="w-3.5 h-3.5" />
-          <kbd className="hidden sm:block opacity-50">⌘K</kbd>
+          <Search className="w-5 h-5 text-green-400 group-hover:scale-110 transition-transform" />
+          <kbd className="hidden lg:block opacity-30 font-mono text-[9px] bg-white/5 px-1.5 py-0.5 rounded border border-white/10 ml-1">
+            ⌘K
+          </kbd>
         </button>
 
-        {/* Theme Toggle */}
         <button
           onClick={toggle}
-          className="p-2 rounded-lg transition-all active:scale-95 border border-border hover:bg-surface-2"
+          className="p-2.5 rounded-xl transition-all border border-white/5 hover:bg-white/5 hover:scale-110 active:scale-95"
           aria-label="Toggle theme"
         >
-          {theme === 'dark'
-            ? <Sun  className="w-4 h-4 text-amber-500" />
-            : <Moon className="w-4 h-4 text-teal-500" />
-          }
+          {theme === 'dark' ? (
+            <Sun className="w-4 h-4 text-amber-500" />
+          ) : (
+            <Moon className="w-4 h-4 text-teal-500" />
+          )}
         </button>
 
-        {/* User Profile + Logout */}
-        <div className="flex items-center gap-3 pl-3 border-l border-border ml-1">
-          <div className="hidden xl:flex flex-col leading-none text-right">
-            <span className="text-xs font-black text-text uppercase tracking-tight">
-              {user?.name || 'Farmer'}
-            </span>
-            <span className="text-[9px] font-black text-text-muted uppercase tracking-widest mt-0.5">
-              {user?.farmName || farmName || 'AgriSense'}
-            </span>
-          </div>
-          <button
-            onClick={logout}
-            className="w-8 h-8 rounded-lg flex items-center justify-center bg-teal-500/10 border border-teal-500/20 text-teal-500 hover:bg-error/10 hover:border-error/20 hover:text-error transition-all"
-            title="Logout"
-          >
-            <LogOut size={16} />
-          </button>
-        </div>
+        {(isAuthenticated || isDemoMode) ? (
+          <div className="flex items-center gap-1 pl-3 border-l border-white/10 ml-1 group">
+            <Link
+              to="/app/profile"
+              className={cn(
+                'flex items-center gap-3 hover:bg-white/5 px-3 py-1.5 rounded-xl transition-all cursor-pointer border border-transparent',
+                location.pathname === '/app/profile' ? 'bg-white/10 border-white/10 shadow-lg' : ''
+              )}
+            >
+              <div className="w-8 h-8 rounded-xl flex items-center justify-center text-[10px] font-black border border-teal-500/20 shadow-lg bg-teal-500/10 text-teal-500 group-hover:scale-105 transition-all overflow-hidden">
+                {user?.avatar ? (
+                  <img src={user.avatar} alt="" className="w-full h-full object-cover" />
+                ) : (
+                  (user?.name || 'RK')
+                    .split(' ')
+                    .map((n) => n[0])
+                    .join('')
+                    .slice(0, 2)
+                    .toUpperCase()
+                )}
+              </div>
+              <div className="hidden xl:flex flex-col leading-none">
+                <span className="text-xs font-black text-white group-hover:text-teal-400 transition-colors">
+                  {user?.name || (isDemoMode ? 'Demo User' : 'Rajesh Kumar')}
+                </span>
+                <span className="text-[8px] font-black text-white/30 uppercase tracking-widest mt-0.5">
+                  {user?.farmName || farmName || 'Green Farm'}
+                </span>
+              </div>
+            </Link>
 
-        {/* Mobile Menu Button */}
+            <button
+              onClick={() => {
+                logout();
+                setDemoMode(false);
+                navigate('/');
+              }}
+              className="p-2.5 rounded-xl transition-all border border-white/5 hover:bg-red-500/10 hover:text-red-500 active:scale-95 ml-1"
+              title="Logout"
+            >
+              <LogOut size={16} />
+            </button>
+          </div>
+        ) : (
+          <div className="hidden sm:flex items-center gap-3 pl-3 border-l border-white/10 ml-1">
+            <button 
+              onClick={() => navigate('/login')}
+              className="px-4 py-2 text-[10px] font-black uppercase tracking-widest text-white/60 hover:text-white transition-colors"
+            >
+              Sign In
+            </button>
+            <button 
+              onClick={() => navigate('/register')}
+              className="px-4 py-2 bg-teal-500 text-bg text-[10px] font-black uppercase tracking-widest rounded-xl transition-all hover:scale-105 active:scale-95 shadow-lg shadow-teal-500/20"
+            >
+              Sign Up
+            </button>
+          </div>
+        )}
+
         <button
-          className="md:hidden p-2 rounded-lg text-text-muted hover:bg-surface-2"
+          className="md:hidden p-2.5 rounded-xl text-white/40 hover:bg-white/5 hover:text-white"
           onClick={() => setMobileOpen(!mobileOpen)}
         >
-          {mobileOpen ? <X size={20} /> : <Menu size={20} />}
+          {mobileOpen ? <X size={24} /> : <Menu size={24} />}
         </button>
-
       </div>
 
-
-      {/* ── Mobile Overlay ── */}
       <AnimatePresence>
         {mobileOpen && (
           <motion.div
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 0.95 }}
-            className="fixed inset-0 top-14 z-40 flex flex-col gap-1 p-6 md:hidden overflow-y-auto"
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -20 }}
+            className="fixed inset-0 top-16 z-40 flex flex-col gap-2 p-6 md:hidden overflow-y-auto"
             style={{ background: 'var(--sidebar-bg)' }}
           >
-            <div className="flex flex-col gap-2">
-              {NAV_LINKS.map(link => (
-                <button
-                  key={link.id}
-                  onClick={() => {
-                    setActivePage(link.id);
-                    setMobileOpen(false);
-                  }}
+            {NAV_LINKS.map((link) => {
+              const Icon = link.icon;
+              const active = location.pathname === link.path;
+              return (
+                <Link
+                  key={link.path}
+                  to={link.path}
+                  onClick={() => setMobileOpen(false)}
                   className={cn(
-                    'w-full text-left px-6 py-4 rounded-xl text-xs font-black uppercase tracking-widest border border-transparent transition-all',
-                    activePage === link.id
-                      ? 'bg-teal-500/10 text-teal-500 border-border'
-                      : 'text-text-muted hover:bg-surface-2'
+                    'w-full text-left px-6 py-4 rounded-xl text-xs font-black uppercase tracking-widest border border-transparent transition-all flex items-center gap-4',
+                    active
+                      ? 'bg-teal-500/10 text-teal-500 border-teal-500/20'
+                      : 'text-white/40 hover:bg-white/5'
                   )}
                 >
+                  <Icon size={18} />
                   {link.label}
-                </button>
-              ))}
-            </div>
-
-            <div className="mt-auto pt-6 border-t border-border flex flex-col gap-4">
-              {/* Domain Switcher */}
-              <div className="flex items-center justify-between px-2">
-                <span className="text-[10px] font-black text-text-muted uppercase tracking-widest">Active Domain</span>
-                <DomainSwitcher />
-              </div>
-
-              {/* Demo Mode */}
-              <div className="flex items-center justify-between px-2">
-                <span className="text-[10px] font-black text-text-muted uppercase tracking-widest">Environment</span>
-                <button
-                  onClick={() => setDemoMode(!isDemoMode)}
-                  className={cn(
-                    'flex items-center gap-2 px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest border',
-                    isDemoMode
-                      ? 'bg-amber-500/10 border-amber-500/20 text-amber-500'
-                      : 'bg-teal-500/10 border-teal-500/20 text-teal-500'
-                  )}
-                >
-                  {isDemoMode ? <FlaskConical size={11} /> : <Database size={11} />}
-                  {isDemoMode ? 'Demo Mode' : 'Live API'}
-                </button>
-              </div>
-
-              {/* User Card + Logout */}
-              <div className="p-4 rounded-2xl glass border border-border flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-xl bg-teal-500/10 flex items-center justify-center text-teal-500 text-xs font-black">
-                    {(user?.name || 'F').charAt(0).toUpperCase()}
-                  </div>
-                  <div>
-                    <p className="text-xs font-black text-text capitalize">{user?.name || 'Farmer'}</p>
-                    <p className="text-[9px] font-black text-text-muted uppercase tracking-widest">
-                      {user?.farmName || farmName}
-                    </p>
-                  </div>
-                </div>
-                <button
-                  onClick={logout}
-                  className="p-3 rounded-xl bg-error/10 text-error hover:bg-error/20 transition-all"
-                  title="Logout"
-                >
-                  <LogOut size={18} />
-                </button>
-              </div>
-            </div>
+                </Link>
+              );
+            })}
           </motion.div>
         )}
       </AnimatePresence>
-    </header>
+    </motion.header>
   );
 }

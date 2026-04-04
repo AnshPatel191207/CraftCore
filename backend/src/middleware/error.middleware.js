@@ -54,6 +54,7 @@ const errorMiddleware = (err, req, res, next) => {
     // Final response shape
     res.status(statusCode).json({
         success: false,
+        data: null,
         message,
         code,
         ...(errors.length > 0 && { errors }),

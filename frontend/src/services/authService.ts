@@ -1,23 +1,24 @@
 import api from '../lib/axios';
 
 export const authService = {
+  /**
+   * KrishiSetu Auth Service
+   * All methods use the 'api' instance from axios.ts prefixed with /api
+   */
+
   register: (data: {
     name: string; email: string; password: string;
     farmName?: string; totalAcres?: number;
   }) => api.post('/auth/register', data),
 
-  login: async (email: string, password: string) => {
-    const res = await api.post('/auth/login', { email, password });
-    localStorage.setItem('accessToken', res.data.data.accessToken);
-    return res.data.data;     // { user, accessToken }
-  },
+  login: (email: string, password: string) => 
+    api.post('/auth/login', { email, password }),
 
-  logout: async () => {
-    await api.post('/auth/logout').catch(() => {});
-    localStorage.removeItem('accessToken');
-  },
+  logout: () => 
+    api.post('/auth/logout').catch(() => {}),
 
-  getMe: () => api.get('/auth/me'),
+  getMe: () => 
+    api.get('/auth/me'),
 
   updateProfile: (data: {
     name?: string; farmName?: string;
@@ -25,6 +26,7 @@ export const authService = {
   }) => api.put('/auth/profile', data),
 
   googleLogin: () => {
-    window.location.href = '/api/auth/google';
+    // Standardizing to /api/auth/google as per the new prefix policy
+    window.location.href = `${api.defaults.baseURL}/auth/google`;
   }
 };
