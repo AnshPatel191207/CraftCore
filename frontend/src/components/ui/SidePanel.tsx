@@ -1,5 +1,5 @@
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Sparkles, Send, Zap, ChevronRight, Bot } from 'lucide-react';
+import { X, Sparkles, Send, Bot, Globe, Check } from 'lucide-react';
 import { useFarmStore } from '../../store/farmStore';
 import { useState, useEffect, useRef } from 'react';
 import { cn } from '../../lib/utils';
@@ -9,33 +9,84 @@ interface SidePanelProps {
   onClose: () => void;
 }
 
+type LangCode = 'EN' | 'HI' | 'GU' | 'HING' | 'GUENG';
+
+const TRANSLATIONS: Record<string, Record<LangCode, string>> = {
+  "Use urea and compost": {
+    EN: "Use urea and compost for better yield.",
+    HI: "बेहतर उपज के लिए यूरिया और खाद का उपयोग करें।",
+    GU: "સારી ઉપજ માટે યુરિયા અને ખાતરનો ઉપયોગ કરો.",
+    HING: "Behtar yield ke liye Urea aur khaad use karo.",
+    GUENG: "Saari yield maate Urea ane khaatar use karo."
+  },
+  "Your crop needs better soil nutrients": {
+    EN: "Your crop needs better soil nutrients. Consider testing your soil.",
+    HI: "आपकी फसल को बेहतर मिट्टी के पोषक तत्वों की आवश्यकता है। अपनी मिट्टी के परीक्षण पर विचार करें।",
+    GU: "તમારા પાકને વધુ સારી જમીનના પોષક તત્વોની જરૂર છે. તમારી જમીનનું પરીક્ષણ કરવાનું વિચારો.",
+    HING: "Aapki fasal ko behtar soil nutrients chahiye. Soil test karwana chahiye.",
+    GUENG: "Tamara pak ne behtar soil nutrients ni jarrur che. Soil testing karavo."
+  },
+  "Please provide more details": {
+    EN: "Please provide more details about your concern.",
+    HI: "कृपया अपनी चिंता के बारे में अधिक विवरण प्रदान करें।",
+    GU: "કૃપા કરીને તમારા પ્રશ્ન વિશે વધુ વિગત આપો.",
+    HING: "Kripya apne sawaal ki thodi aur details dein.",
+    GUENG: "Krupya tamara prashn ni thodi vadhare details aapo."
+  },
+  "Analyzing data...": {
+    EN: "Analyzing data for you...",
+    HI: "आपके लिए डेटा का विश्लेषण कर रहा हूँ...",
+    GU: "તમારા માટે ડેટાનું વિશ્લેષણ કરી રહ્યું છે...",
+    HING: "Aapke liye data analyze ho raha hai...",
+    GUENG: "Tamara maate data analysis thai rahyu che..."
+  }
+};
+
+const LANG_OPTIONS: { code: LangCode; label: string }[] = [
+  { code: 'EN', label: 'English' },
+  { code: 'HI', label: 'हिंदी' },
+  { code: 'GU', label: 'ગુજરાતી' },
+  { code: 'HING', label: 'Hinglish' },
+  { code: 'GUENG', label: 'Guj-Eng' },
+];
+
 export function SidePanel({ isOpen, onClose }: SidePanelProps) {
   const { currentDomain, pendingChatQuery, setPendingChatQuery } = useFarmStore();
+  const [lang, setLang] = useState<LangCode>('EN');
+  const [showLangMenu, setShowLangMenu] = useState(false);
+  
   const [messages, setMessages] = useState([
-    { role: 'ai', content: `Hello! I am your ${currentDomain} Advisor. How can I help optimize your operations today?` }
+    { role: 'ai', content: `Hello! I am your KrishiSetu AI. How can I help optimize your operations today?` }
   ]);
   const [input, setInput] = useState('');
   const chatEndRef = useRef<HTMLDivElement>(null);
 
+  const translate = (textKey: string, code: LangCode) => {
+    return TRANSLATIONS[textKey]?.[code] || textKey;
+  };
+
+  const detectLanguage = (text: string): LangCode | null => {
+    if (/[ऀ-ॿ]/.test(text)) return 'HI';
+    if (/[અ-હ]/.test(text)) return 'GU';
+    return null;
+  };
+
   useEffect(() => {
     if (isOpen && pendingChatQuery) {
       const query = pendingChatQuery;
-      // Clear store query immediately
       setPendingChatQuery(null);
       
-      // Process the query
       const userMsg = { role: 'user' as const, content: query };
       setMessages(prev => [...prev, userMsg]);
       
-      // Simulate AI response
       setTimeout(() => {
         setMessages(prev => [...prev, { 
           role: 'ai', 
-          content: `Analyzing ${currentDomain} climate data for your request: "${query}"... Based on our Save Soil AI metrics, I recommend implementing cover cropping to sequester more carbon and using drip irrigation to maintain moisture level above 25%.` 
+          content: `${translate("Analyzing data...", lang)} Based on our Save Soil AI metrics, I recommend implementing cover cropping to sequester more carbon and using drip irrigation to maintain moisture level above 25%.` 
         }]);
       }, 1000);
     }
-  }, [isOpen, pendingChatQuery, currentDomain, setPendingChatQuery]);
+  }, [isOpen, pendingChatQuery, currentDomain, setPendingChatQuery, lang]);
 
   useEffect(() => {
     if (chatEndRef.current) {
@@ -45,24 +96,48 @@ export function SidePanel({ isOpen, onClose }: SidePanelProps) {
 
   const handleSend = () => {
     if (!input.trim()) return;
+    
+    // Auto-detect language if possible
+    const detected = detectLanguage(input);
+    const activeLang = detected || lang;
+    if (detected && detected !== lang) setLang(detected);
+
     const newMessages = [...messages, { role: 'user', content: input }];
     setMessages(newMessages);
     setInput('');
     
-    // Simulate AI response
+    // Mock response logic
     setTimeout(() => {
+      let responseKey = "Please provide more details";
+      const normalizedInput = input.toLowerCase();
+
+      if (normalizedInput.includes("fertilizer") || normalizedInput.includes("urea") || normalizedInput.includes("khaad") || normalizedInput.includes("khaatar")) {
+        responseKey = "Use urea and compost";
+      } else if (normalizedInput.includes("pak") || normalizedInput.includes("crop") || normalizedInput.includes("fasal")) {
+        responseKey = "Your crop needs better soil nutrients";
+      }
+
       setMessages(prev => [...prev, { 
         role: 'ai', 
-        content: `Analyzing ${currentDomain} data... Based on current sensor readings, I recommend increasing irrigation by 15% in the north sector to maintain optimal root health.` 
+        content: translate(responseKey, activeLang)
       }]);
     }, 1500);
+  };
+
+  const getPlaceholder = (code: LangCode) => {
+    switch(code) {
+      case 'HI': return "अपना सवाल पूछें...";
+      case 'GU': return "તમારો પ્રશ્ન પૂછો...";
+      case 'HING': return "Apna sawaal pucho...";
+      case 'GUENG': return "Tamaro sawaal pucho...";
+      default: return "Ask advisor anything...";
+    }
   };
 
   return (
     <AnimatePresence>
       {isOpen && (
         <>
-          {/* Backdrop */}
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -71,7 +146,6 @@ export function SidePanel({ isOpen, onClose }: SidePanelProps) {
             className="fixed inset-0 bg-bg/40 backdrop-blur-sm z-[110]"
           />
 
-          {/* Panel */}
           <motion.div
             initial={{ x: '100%' }}
             animate={{ x: 0 }}
@@ -91,10 +165,51 @@ export function SidePanel({ isOpen, onClose }: SidePanelProps) {
                      <Bot className="text-teal-500" size={28} />
                    </div>
                    <div>
-                     <h2 className="text-xl font-display font-black text-white tracking-tight">AI Advisor</h2>
-                     <div className="flex items-center gap-2 mt-1">
-                        <span className="w-1.5 h-1.5 rounded-full bg-teal-500 animate-pulse" />
-                        <span className="text-[10px] font-black text-teal-500 uppercase tracking-widest">{currentDomain} Focus Mode</span>
+                     <h2 className="text-xl font-display font-black text-white tracking-tight">KrishiSetu AI</h2>
+                     <div className="flex items-center gap-4 mt-1">
+                        <div className="flex items-center gap-2">
+                           <span className="w-1.5 h-1.5 rounded-full bg-teal-500 animate-pulse" />
+                           <span className="text-[10px] font-black text-teal-500 uppercase tracking-widest">{currentDomain} Mode</span>
+                        </div>
+                        
+                        {/* Language Selector */}
+                        <div className="relative">
+                          <button 
+                            onClick={() => setShowLangMenu(!showLangMenu)}
+                            className="flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-white/5 border border-white/10 text-[9px] font-black text-text-muted hover:text-white transition-colors uppercase tracking-widest"
+                          >
+                            <Globe size={10} className="text-teal-500" />
+                            {LANG_OPTIONS.find(o => o.code === lang)?.label}
+                          </button>
+                          
+                          <AnimatePresence>
+                            {showLangMenu && (
+                              <motion.div
+                                initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                                animate={{ opacity: 1, y: 0, scale: 1 }}
+                                exit={{ opacity: 0, y: 10, scale: 0.95 }}
+                                className="absolute top-full left-0 mt-2 w-32 glass border border-white/10 rounded-xl overflow-hidden z-20 shadow-2xl"
+                              >
+                                {LANG_OPTIONS.map(opt => (
+                                  <button
+                                    key={opt.code}
+                                    onClick={() => {
+                                      setLang(opt.code);
+                                      setShowLangMenu(false);
+                                    }}
+                                    className={cn(
+                                      "w-full px-4 py-2.5 text-[10px] font-black uppercase tracking-widest text-left flex items-center justify-between transition-colors",
+                                      lang === opt.code ? "bg-teal-500/10 text-teal-500" : "text-text-muted hover:bg-white/5 hover:text-white"
+                                    )}
+                                  >
+                                    {opt.label}
+                                    {lang === opt.code && <Check size={10} />}
+                                  </button>
+                                ))}
+                              </motion.div>
+                            )}
+                          </AnimatePresence>
+                        </div>
                      </div>
                    </div>
                  </div>
@@ -135,29 +250,12 @@ export function SidePanel({ isOpen, onClose }: SidePanelProps) {
               <div ref={chatEndRef} />
             </div>
 
-            {/* Recommended Prompts */}
-            <div className="p-8 border-t border-white/5 bg-white/[0.02] space-y-4">
-                <p className="text-[10px] font-black text-text-muted uppercase tracking-widest px-1">Suggested Guidance</p>
-                <div className="flex flex-wrap gap-2">
-                    {['Optimize Yield', 'Soil Deficiencies', 'Market Trends'].map(p => (
-                        <button 
-                            key={p}
-                            onClick={() => setInput(p)}
-                            className="px-4 py-2 glass border border-white/10 rounded-xl text-[10px] font-black text-white hover:border-teal-500/30 hover:bg-teal-500/5 transition-all flex items-center gap-2 group uppercase tracking-widest"
-                        >
-                            <ChevronRight size={12} className="text-teal-500" />
-                            {p}
-                        </button>
-                    ))}
-                </div>
-            </div>
-
             {/* Input Area */}
             <div className="p-8 border-t border-white/5">
               <div className="relative group">
                 <input
                   type="text"
-                  placeholder="Ask advisor anything..."
+                  placeholder={getPlaceholder(lang)}
                   value={input}
                   onChange={(e) => setInput(e.target.value)}
                   onKeyDown={(e) => e.key === 'Enter' && handleSend()}
@@ -173,11 +271,11 @@ export function SidePanel({ isOpen, onClose }: SidePanelProps) {
               </div>
               <div className="flex items-center justify-center gap-4 mt-6 text-[10px] font-black text-text-muted uppercase tracking-widest opacity-50">
                  <div className="flex items-center gap-1.5 grayscale group-hover:grayscale-0 transition-all cursor-help">
-                    <Zap size={12} />
-                    <span>Turbo Sync Active</span>
+                    <Globe size={12} className="text-teal-500" />
+                    <span>Multi-Language Active: {lang}</span>
                  </div>
                  <div className="w-1 h-1 bg-white/20 rounded-full" />
-                 <span>KrishiSetu AI Engine v4</span>
+                 <span>AI v4 Multi-Engine</span>
               </div>
             </div>
           </motion.div>

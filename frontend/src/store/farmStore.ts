@@ -65,6 +65,8 @@ interface FarmState {
   addActivity: (activity: { user: string; location: string; action: string }) => void;
   pendingChatQuery: string | null;
   setPendingChatQuery: (query: string | null) => void;
+  currentAdvisory: any;
+  updateAdvisory: (data: any) => void;
 }
 
 const mockAdvisories: Advisory[] = [
@@ -216,4 +218,6 @@ export const useFarmStore = create<FarmState>((set) => ({
     activityFeed: [{ id: Date.now().toString(), ...activity, time: 'Just now' }, ...state.activityFeed].slice(0, 5)
   })),
   setPendingChatQuery: (query) => set({ pendingChatQuery: query }),
+  currentAdvisory: null,
+  updateAdvisory: (data) => set({ currentAdvisory: data }),
 }));

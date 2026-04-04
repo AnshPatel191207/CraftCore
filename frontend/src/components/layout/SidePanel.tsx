@@ -10,7 +10,7 @@ interface SidePanelProps {
 }
 
 const mockMessages = [
-  { role: 'bot', text: 'Hello! I\'m your AgriSense AI advisor. How can I help with your fields today?', time: '9:00 AM' },
+  { role: 'bot', text: 'Hello! I\'m your KrishiSetu AI advisor. How can I help with your fields today?', time: '9:00 AM' },
   { role: 'user', text: 'Should I start sowing wheat in Field A?', time: '9:02 AM' },
   { 
     role: 'bot', 
