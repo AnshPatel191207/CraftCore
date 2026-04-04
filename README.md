@@ -36,7 +36,7 @@
 
 > **KrishiSetu** *(from Sanskrit: "Bridge to Farming")* is an **AI-powered agricultural intelligence platform** that bridges the gap between modern technology and traditional farming. It provides farmers and agri-professionals with real-time insights, crop recommendations, soil analytics, and weather intelligence — all in one unified dashboard.
 
-🔗 **[→ Experience it live: spectacular-madeleine-37b944.netlify.app](https://spectacular-madeleine-37b944.netlify.app/)**
+🔗 **[→ KrishiSetu](https://craft-core-sage.vercel.app/)** 
 
 ---
 
@@ -131,7 +131,7 @@ npm install
 npm run dev
 ```
 
-> 🌐 Or simply visit the live platform: **[spectacular-madeleine-37b944.netlify.app](https://spectacular-madeleine-37b944.netlify.app/)**
+> 🌐 Or simply visit the live platform: **[KrishiSetu](https://craft-core-sage.vercel.app/)**
 
 ---
 
@@ -164,7 +164,7 @@ npm run dev
 
 <div align="center">
 
-> 🔗 **[Click here to explore the full live platform →](https://spectacular-madeleine-37b944.netlify.app/)**
+> 🔗 **[Click here to explore the full live platform →](https://craft-core-sage.vercel.app/)**
 
 </div>
 
