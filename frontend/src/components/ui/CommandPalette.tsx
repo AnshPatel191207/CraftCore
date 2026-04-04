@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Search, LayoutDashboard, FileText, MessageSquareWarning, Sprout, CloudSun, Command, Globe, Zap, Cpu, ShieldCheck } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import { useFarmStore } from '../../store/farmStore';
 import { cn } from '../../lib/utils';
 
@@ -24,7 +25,8 @@ interface CommandPaletteProps {
 
 export function CommandPalette({ isOpen, setIsOpen }: CommandPaletteProps) {
   const [search, setSearch] = useState('');
-  const { setActivePage, currentDomain, setDomain } = useFarmStore();
+  const { currentDomain, setDomain } = useFarmStore();
+  const navigate = useNavigate();
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -57,7 +59,7 @@ export function CommandPalette({ isOpen, setIsOpen }: CommandPaletteProps) {
        };
        setDomain(domainMap[id]);
     } else {
-       setActivePage(id);
+       navigate(`/app/${id}`);
     }
     setIsOpen(false);
     setSearch('');

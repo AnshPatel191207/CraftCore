@@ -15,6 +15,7 @@ import {
 } from 'lucide-react';
 import { useLanguage } from '../components/ui/LanguageSwitcher';
 import { ScrollReveal } from '../components/ScrollReveal';
+import { useNavigate } from 'react-router-dom';
 import { useFarmStore } from '../store/farmStore';
 import { analyzeSoil } from '../lib/fertilizerLogic';
 
@@ -49,12 +50,13 @@ const FERTILIZER_PRICING = [
 
 export default function FertilizerAdvisory() {
   const { t } = useLanguage();
-  const { currentAdvisory, updateAdvisory, setActivePage } = useFarmStore();
+  const { currentAdvisory, updateAdvisory } = useFarmStore();
+  const navigate = useNavigate();
   const [isDummyMode, setIsDummyMode] = useState(false);
   const realAdvisoryRef = useRef<any>(null);
 
   const handleSoilRedirect = () => {
-    setActivePage('soil');
+    navigate('/app/soil');
   };
 
   const loadDummyData = () => {

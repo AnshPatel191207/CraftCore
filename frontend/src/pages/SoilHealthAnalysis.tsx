@@ -15,6 +15,7 @@ import {
 } from 'lucide-react';
 import { useLanguage } from '../components/ui/LanguageSwitcher';
 import { ScrollReveal } from '../components/ScrollReveal';
+import { useNavigate } from 'react-router-dom';
 import { useFarmStore } from '../store/farmStore';
 
 const PARAMETER_MAP = [
@@ -28,7 +29,8 @@ const PARAMETER_MAP = [
 
 export default function SoilHealthAnalysis() {
   const { t } = useLanguage();
-  const { soilReports, setActivePage } = useFarmStore();
+  const { soilReports } = useFarmStore();
+  const navigate = useNavigate();
 
   const [hasData, setHasData] = useState(false);
   const [isDummyMode, setIsDummyMode] = useState(false);
@@ -52,10 +54,6 @@ export default function SoilHealthAnalysis() {
   };
 
   const report: any = isDummyMode ? dummyReport : realReport;
-
-  const handleImport = () => {
-    setActivePage('soil');
-  };
 
   const handleDummy = () => {
     setIsDummyMode(true);
@@ -95,12 +93,12 @@ export default function SoilHealthAnalysis() {
           </p>
 
           <div className="flex flex-col gap-4">
-            <button 
-              onClick={handleImport}
-              className="w-full py-4 bg-teal-500 text-bg rounded-2xl font-black uppercase tracking-widest hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center justify-center gap-3 shadow-xl shadow-teal-500/20"
+            <button
+              onClick={() => navigate('/app/soil')}
+              className="px-8 py-4 bg-teal-500 text-bg rounded-2xl font-black uppercase tracking-widest hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center justify-center gap-3 shadow-xl shadow-teal-500/20"
             >
               <Import size={20} />
-              Import Data
+              Initialize Soil Scan
             </button>
             <button 
               onClick={handleDummy}

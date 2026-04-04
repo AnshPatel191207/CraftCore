@@ -9,6 +9,7 @@ interface User {
   role: 'farmer' | 'admin';
   farmName?: string;
   totalAcres?: number;
+  avatar?: string;
 }
 
 interface AuthState {
@@ -35,15 +36,28 @@ export const useAuthStore = create<AuthState>()(
       isLoading: false,
       error: null,
 
-      setAuth: (user, token) => set({ user, token, isAuthenticated: true, error: null }),
+      setAuth: (user, token) => {
+        localStorage.setItem('token', token);
+        set({ user, token, isAuthenticated: true, error: null });
+      },
       
       login: async (email, password) => {
         set({ isLoading: true, error: null });
         try {
-          const data = await authService.login(email, password);
-          set({ user: data.user, token: data.accessToken, isAuthenticated: true, isLoading: false });
+          const res = await authService.login(email, password);
+          const { user, accessToken } = res.data.data;
+          
+          localStorage.setItem('token', accessToken);
+          set({ 
+            user, 
+            token: accessToken, 
+            isAuthenticated: true, 
+            isLoading: false,
+            error: null
+          });
         } catch (err: any) {
-          set({ error: err.response?.data?.message || 'Login failed', isLoading: false });
+          const msg = err.response?.data?.message || 'Login failed';
+          set({ error: msg, isLoading: false });
           throw err;
         }
       },
@@ -53,32 +67,50 @@ export const useAuthStore = create<AuthState>()(
         try {
           const res = await authService.register(data);
           const { user, accessToken } = res.data.data;
-          localStorage.setItem('accessToken', accessToken);
-          set({ user, token: accessToken, isAuthenticated: true, isLoading: false });
+          
+          localStorage.setItem('token', accessToken);
+          set({ 
+            user, 
+            token: accessToken, 
+            isAuthenticated: true, 
+            isLoading: false,
+            error: null
+          });
         } catch (err: any) {
-          set({ error: err.response?.data?.message || 'Registration failed', isLoading: false });
+          const msg = err.response?.data?.message || 'Registration failed';
+          set({ error: msg, isLoading: false });
           throw err;
         }
       },
 
       logout: async () => {
-        await authService.logout();
-        set({ user: null, token: null, isAuthenticated: false });
+        try {
+          await authService.logout();
+        } catch (err) {
+          console.error('Logout error:', err);
+        } finally {
+          localStorage.removeItem('token');
+          set({ user: null, token: null, isAuthenticated: false, error: null });
+        }
       },
 
       checkAuth: async () => {
-        const token = localStorage.getItem('accessToken');
+        const token = localStorage.getItem('token');
         if (!token) {
-          set({ isAuthenticated: false, user: null });
+          set({ isAuthenticated: false, user: null, token: null });
           return;
         }
 
         try {
           const res = await authService.getMe();
-          set({ user: res.data.data.user, isAuthenticated: true });
+          set({ 
+            user: res.data.data.user, 
+            token, 
+            isAuthenticated: true 
+          });
         } catch (err) {
-          localStorage.removeItem('accessToken');
-          set({ isAuthenticated: false, user: null });
+          localStorage.removeItem('token');
+          set({ isAuthenticated: false, user: null, token: null });
         }
       },
 
@@ -88,7 +120,11 @@ export const useAuthStore = create<AuthState>()(
     }),
     {
       name: 'agrisense-auth',
-      partialize: (state) => ({ token: state.token, user: state.user, isAuthenticated: state.isAuthenticated }),
+      partialize: (state: AuthState) => ({ 
+        token: state.token, 
+        user: state.user, 
+        isAuthenticated: state.isAuthenticated 
+      }),
     }
   )
 );

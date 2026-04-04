@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Mic, MicOff, Settings } from 'lucide-react';
-import { useFarmStore } from '../../store/farmStore';
+import { useNavigate } from 'react-router-dom';
 import { useLanguage } from './LanguageSwitcher';
 
 type Language = 'EN' | 'HI' | 'GU';
@@ -22,7 +22,7 @@ const COMMANDS = {
 };
 
 export function VoiceAssistant() {
-  const { setActivePage } = useFarmStore();
+  const navigate = useNavigate();
   const { language } = useLanguage();
   const [isListening, setIsListening] = useState(false);
   const [transcript, setTranscript] = useState('');
@@ -65,32 +65,32 @@ export function VoiceAssistant() {
     // Soil
     if (COMMANDS.soil.some(cmd => text.includes(cmd))) {
       speak(selectedLang === 'HI' ? "मिट्टी की रिपोर्ट खोल रहे हैं" : selectedLang === 'GU' ? "માટીનો રિપોર્ટ ખોલી રહ્યો છું" : "Opening your soil health analysis");
-      setActivePage('soilhealth');
+      navigate('/app/soil-analysis');
     }
     // Fertilizer
     else if (COMMANDS.fertilizer.some(cmd => text.includes(cmd))) {
       speak(selectedLang === 'HI' ? "खाद की सलाह खोल रहे हैं" : selectedLang === 'GU' ? "ખાતરની સલાહ ખોલી રહ્યો છું" : "Opening fertilizer advisory");
-      setActivePage('fertilizer');
+      navigate('/app/fertilizer');
     }
     // Crops
     else if (COMMANDS.crops.some(cmd => text.includes(cmd))) {
       speak(selectedLang === 'HI' ? "फसलों का डैशબોર્ડ खोल रहे हैं" : selectedLang === 'GU' ? "પાક ડેશબોર્ડ ખોલી રહ્યો છું" : "Opening your crop management");
-      setActivePage('crops');
+      navigate('/app/crops');
     }
     // Market
     else if (COMMANDS.market.some(cmd => text.includes(cmd))) {
       speak(selectedLang === 'HI' ? "बाजार भाव दिखा रहे हैं" : selectedLang === 'GU' ? "બજાર ભાવ બતાવી રહ્યો છું" : "Checking market intelligence");
-      setActivePage('market');
+      navigate('/app/market');
     }
     // Dashboard
     else if (COMMANDS.dashboard.some(cmd => text.includes(cmd))) {
       speak(selectedLang === 'HI' ? "मुख्य डैशबोर्ड पर जा रहे हैं" : selectedLang === 'GU' ? "મુખ્ય ડેશબોર્ડ પર જઈ રહ્યો છું" : "Going to dashboard");
-      setActivePage('dashboard');
+      navigate('/app/dashboard');
     }
     // Weather
     else if (COMMANDS.weather.some(cmd => text.includes(cmd))) {
       speak(selectedLang === 'HI' ? "मौसम की जानकारी खोल रहे हैं" : selectedLang === 'GU' ? "હવામાનની માહિતી ખોલી રહ્યો છું" : "Opening weather forecasts");
-      setActivePage('weather');
+      navigate('/app/weather');
     }
     else {
       speak(selectedLang === 'HI' ? "क्षमा करें, मुझे समझ नहीं आया" : selectedLang === 'GU' ? "ક્ષમા કરશો, મને સમજાયું નહીં" : "Sorry, I didn't catch that command");

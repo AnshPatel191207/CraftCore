@@ -3,6 +3,7 @@ import {
   Sprout, TrendingUp, AlertTriangle, Calendar,
   ChevronRight, LayoutDashboard, Globe, MapPin, Target,
 } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import {
   AreaChart, Area, XAxis, YAxis, CartesianGrid,
@@ -80,8 +81,9 @@ export default function Dashboard() {
     fetchDashboardData,
     isDemoMode,
     setPanelOpen,
-    setActivePage,
   } = useFarmStore();
+
+  const navigate = useNavigate();
 
   const { t } = useLanguage();
 
@@ -101,7 +103,7 @@ export default function Dashboard() {
   const displayArea  = stats?.activeArea ?? totalAcres;
   const displayYield = stats?.yieldEst   ?? '4.5 t/ac';
 
-  const handleImport = () => setActivePage('soil');
+  const handleImport = () => navigate('/app/soil');
   const handleDummy  = () => setHasData(true);
 
 

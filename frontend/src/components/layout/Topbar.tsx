@@ -1,69 +1,55 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import {
   Sprout, Sun, Moon, Menu, X, Search,
-  LayoutDashboard, FileText, Activity,
+  LayoutDashboard, FileText,
   TrendingUp, Lightbulb, CloudSun,
-  FlaskConical, Leaf, LogOut
+  Leaf, LogOut
 } from 'lucide-react';
+import { useNavigate, useLocation, Link } from 'react-router-dom';
 import { useTheme } from '../../providers/ThemeProvider';
 import { useFarmStore } from '../../store/farmStore';
 import { useAuthStore } from '../../store/authStore';
 import { cn } from '../../lib/utils';
 import { motion, AnimatePresence } from 'framer-motion';
-import LanguageSwitcher, { useLanguage } from '../ui/LanguageSwitcher';
+import LanguageSwitcher from '../ui/LanguageSwitcher';
 
 const NAV_LINKS = [
-  { label: 'Dashboard', id: 'dashboard', icon: LayoutDashboard },
-  { label: 'Soil Reports', id: 'soil', icon: FileText },
-  { label: 'Soil Health', id: 'soilhealth', icon: Activity },
-  { label: 'Market', id: 'market', icon: TrendingUp },
-  { label: 'Advisory', id: 'advisory', icon: Lightbulb },
-  { label: 'Crops', id: 'crops', icon: Sprout },
-  { label: 'Weather', id: 'weather', icon: CloudSun },
-  { label: 'Fertilizer', id: 'fertilizer', icon: FlaskConical },
-  { label: 'Save Soil', id: 'savesoil', icon: Leaf },
+  { label: 'Dashboard', path: '/app/dashboard', icon: LayoutDashboard },
+  { label: 'Soil Reports', path: '/app/soil', icon: FileText },
+  { label: 'Market', path: '/app/market', icon: TrendingUp },
+  { label: 'Advisory', path: '/app/advisory', icon: Lightbulb },
+  { label: 'Crops', path: '/app/crops', icon: Sprout },
+  { label: 'Weather', path: '/app/weather', icon: CloudSun },
+  { label: 'Save Soil', path: '/app/savesoil', icon: Leaf },
 ];
 
 export default function Topbar() {
+  const navigate = useNavigate();
+  const location = useLocation();
   const {
-    activePage,
-    setActivePage,
     setCommandPaletteOpen,
     isDemoMode,
     setDemoMode,
     farmName,
   } = useFarmStore();
 
-  const { user, logout } = useAuthStore();
+  const { user, logout, isAuthenticated } = useAuthStore();
   const { theme, toggle } = useTheme();
-  const { t } = useLanguage();
   const [mobileOpen, setMobileOpen] = useState(false);
-  const [isOnline, setIsOnline] = useState(navigator.onLine);
-
-  useEffect(() => {
-    const handleOnline = () => setIsOnline(true);
-    const handleOffline = () => setIsOnline(false);
-    window.addEventListener('online', handleOnline);
-    window.addEventListener('offline', handleOffline);
-    return () => {
-      window.removeEventListener('online', handleOnline);
-      window.removeEventListener('offline', handleOffline);
-    };
-  }, []);
 
   return (
     <motion.header
       initial={{ y: -50, opacity: 0 }}
       animate={{ y: 0, opacity: 1 }}
       className={cn(
-        'fixed top-0 left-0 right-0 z-50 h-16',
+        'fixed top-0 left-0 right-0 z-[60] h-16',
         'flex items-center justify-between px-4 sm:px-6',
-        'backdrop-blur-lg bg-green-950/80 border-b border-green-800/30',
+        'backdrop-blur-lg bg-bg/85 border-b border-white/5',
         'text-white transition-all duration-300'
       )}
     >
-      <div
-        onClick={() => setActivePage('landing')}
+      <Link
+        to="/"
         className="flex items-center gap-2 mr-4 shrink-0 cursor-pointer group"
       >
         <div
@@ -77,33 +63,33 @@ export default function Topbar() {
             className="text-sm font-black tracking-tight text-text"
             style={{ fontFamily: 'var(--font-display)' }}
           >
-            AgriSense
+            KrishiSetu
           </span>
           <span className="text-[9px] font-black uppercase tracking-widest text-teal-500">
             {isDemoMode ? 'Demo Sandbox' : 'Live Intelligence'}
           </span>
         </div>
-      </div>
+      </Link>
 
       <nav className="hidden md:flex items-center gap-4 flex-1 justify-center max-w-5xl">
         {NAV_LINKS.map((link) => {
-          const active = activePage === link.id;
+          const active = location.pathname === link.path;
           const Icon = link.icon;
           return (
-            <div key={link.id} className="relative group flex flex-col items-center">
-              <button
-                onClick={() => setActivePage(link.id)}
+            <div key={link.path} className="relative group flex flex-col items-center">
+              <Link
+                to={link.path}
                 className={cn(
-                  'w-11 h-11 flex items-center justify-center rounded-xl transition-all duration-300 hover:scale-110',
+                  'w-11 h-11 flex items-center justify-center rounded-xl transition-all duration-300 hover:scale-110 border border-transparent',
                   active
-                    ? 'bg-green-500/20 text-green-400 shadow-[0_0_15px_rgba(34,197,94,0.4)]'
-                    : 'text-green-300/50 hover:bg-green-700/30 hover:text-green-300'
+                    ? 'bg-teal-500/20 text-teal-500 border-teal-500/20 shadow-[0_0_15px_rgba(20,184,166,0.2)]'
+                    : 'text-text-muted hover:bg-white/5 hover:text-white'
                 )}
               >
                 <Icon size={22} strokeWidth={active ? 2.5 : 2} />
-              </button>
+              </Link>
               <div className="absolute -bottom-8 opacity-0 group-hover:opacity-100 group-hover:translate-y-1 transition-all duration-300 pointer-events-none">
-                <div className="bg-green-900 text-white text-[10px] font-black uppercase tracking-widest px-3 py-1.5 rounded-lg border border-green-700/50 shadow-xl whitespace-nowrap">
+                <div className="bg-surface-3 text-white text-[10px] font-black uppercase tracking-widest px-3 py-1.5 rounded-lg border border-white/10 shadow-xl whitespace-nowrap">
                   {link.label}
                 </div>
               </div>
@@ -141,44 +127,65 @@ export default function Topbar() {
           )}
         </button>
 
-        <div className="flex items-center gap-1 pl-3 border-l border-white/10 ml-1 group">
-          <div
-            onClick={() => setActivePage('profile')}
-            className={cn(
-              'flex items-center gap-3 hover:bg-white/5 px-3 py-1.5 rounded-xl transition-all cursor-pointer border border-transparent',
-              activePage === 'profile' ? 'bg-white/10 border-white/10 shadow-lg' : ''
-            )}
-          >
-            <div className="w-8 h-8 rounded-xl flex items-center justify-center text-[10px] font-black border border-green-500/20 shadow-lg bg-green-500/10 text-green-400 group-hover:scale-105 transition-all overflow-hidden">
-              {user?.avatar ? (
-                <img src={user.avatar} alt="" className="w-full h-full object-cover" />
-              ) : (
-                (user?.name || 'RK')
-                  .split(' ')
-                  .map((n) => n[0])
-                  .join('')
-                  .slice(0, 2)
-                  .toUpperCase()
+        {(isAuthenticated || isDemoMode) ? (
+          <div className="flex items-center gap-1 pl-3 border-l border-white/10 ml-1 group">
+            <Link
+              to="/app/profile"
+              className={cn(
+                'flex items-center gap-3 hover:bg-white/5 px-3 py-1.5 rounded-xl transition-all cursor-pointer border border-transparent',
+                location.pathname === '/app/profile' ? 'bg-white/10 border-white/10 shadow-lg' : ''
               )}
-            </div>
-            <div className="hidden xl:flex flex-col leading-none">
-              <span className="text-xs font-black text-white group-hover:text-green-300 transition-colors">
-                {user?.name || 'Rajesh Kumar'}
-              </span>
-              <span className="text-[8px] font-black text-white/30 uppercase tracking-widest mt-0.5">
-                {user?.farmName || farmName || 'Green Farm'}
-              </span>
-            </div>
-          </div>
+            >
+              <div className="w-8 h-8 rounded-xl flex items-center justify-center text-[10px] font-black border border-teal-500/20 shadow-lg bg-teal-500/10 text-teal-500 group-hover:scale-105 transition-all overflow-hidden">
+                {user?.avatar ? (
+                  <img src={user.avatar} alt="" className="w-full h-full object-cover" />
+                ) : (
+                  (user?.name || 'RK')
+                    .split(' ')
+                    .map((n) => n[0])
+                    .join('')
+                    .slice(0, 2)
+                    .toUpperCase()
+                )}
+              </div>
+              <div className="hidden xl:flex flex-col leading-none">
+                <span className="text-xs font-black text-white group-hover:text-teal-400 transition-colors">
+                  {user?.name || (isDemoMode ? 'Demo User' : 'Rajesh Kumar')}
+                </span>
+                <span className="text-[8px] font-black text-white/30 uppercase tracking-widest mt-0.5">
+                  {user?.farmName || farmName || 'Green Farm'}
+                </span>
+              </div>
+            </Link>
 
-          <button
-            onClick={logout}
-            className="p-2.5 rounded-xl transition-all border border-white/5 hover:bg-red-500/10 hover:text-red-500 active:scale-95 ml-1"
-            title="Logout"
-          >
-            <LogOut size={16} />
-          </button>
-        </div>
+            <button
+              onClick={() => {
+                logout();
+                setDemoMode(false);
+                navigate('/');
+              }}
+              className="p-2.5 rounded-xl transition-all border border-white/5 hover:bg-red-500/10 hover:text-red-500 active:scale-95 ml-1"
+              title="Logout"
+            >
+              <LogOut size={16} />
+            </button>
+          </div>
+        ) : (
+          <div className="hidden sm:flex items-center gap-3 pl-3 border-l border-white/10 ml-1">
+            <button 
+              onClick={() => navigate('/login')}
+              className="px-4 py-2 text-[10px] font-black uppercase tracking-widest text-white/60 hover:text-white transition-colors"
+            >
+              Sign In
+            </button>
+            <button 
+              onClick={() => navigate('/register')}
+              className="px-4 py-2 bg-teal-500 text-bg text-[10px] font-black uppercase tracking-widest rounded-xl transition-all hover:scale-105 active:scale-95 shadow-lg shadow-teal-500/20"
+            >
+              Sign Up
+            </button>
+          </div>
+        )}
 
         <button
           className="md:hidden p-2.5 rounded-xl text-white/40 hover:bg-white/5 hover:text-white"
@@ -199,23 +206,22 @@ export default function Topbar() {
           >
             {NAV_LINKS.map((link) => {
               const Icon = link.icon;
+              const active = location.pathname === link.path;
               return (
-                <button
-                  key={link.id}
-                  onClick={() => {
-                    setActivePage(link.id);
-                    setMobileOpen(false);
-                  }}
+                <Link
+                  key={link.path}
+                  to={link.path}
+                  onClick={() => setMobileOpen(false)}
                   className={cn(
                     'w-full text-left px-6 py-4 rounded-xl text-xs font-black uppercase tracking-widest border border-transparent transition-all flex items-center gap-4',
-                    activePage === link.id
-                      ? 'bg-green-500/10 text-green-400 border-green-500/20'
+                    active
+                      ? 'bg-teal-500/10 text-teal-500 border-teal-500/20'
                       : 'text-white/40 hover:bg-white/5'
                   )}
                 >
                   <Icon size={18} />
-                  {t(link.label.toLowerCase())}
-                </button>
+                  {link.label}
+                </Link>
               );
             })}
           </motion.div>

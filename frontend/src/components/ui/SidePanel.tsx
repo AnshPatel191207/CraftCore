@@ -15,6 +15,7 @@ interface SidePanelProps {
 interface Message {
   role: 'ai' | 'user';
   content: string;
+  sources?: string[];
 }
 
 type LangCode = 'EN' | 'HI' | 'GU' | 'HING' | 'GUENG';
@@ -92,23 +93,31 @@ export function SidePanel({ isOpen, onClose }: SidePanelProps) {
     setInput('');
     setLoading(true);
 
-    try {
-      const detected = detectLanguage(question);
-      const activeLang = detected || lang;
-      if (detected && detected !== lang) setLang(detected);
+    const detected = detectLanguage(input);
+    const activeLang = detected || lang;
+    if (detected && detected !== lang) setLang(detected);
 
+    try {
+
+      // We prioritize backend calls now for a real experience
+      const res = await api.post('/rag/ask', { question });
+      
+      setMessages(prev => [...prev, { 
+        role: 'ai', 
+        content: res.data.data.answer,
+        sources: res.data.data.sources
+      }]);
+    } catch (err) {
+      console.error('API Error:', err);
+      // Fallback for demo mode if backend fails
       if (isDemoMode) {
-        await new Promise(r => setTimeout(r, 1200));
         setMessages(prev => [...prev, {
           role: 'ai',
-          content: translate("Analyzing data...", activeLang) + ` Based on current simulations, I recommend increasing nitrogen levels by 10% in Field A.`,
+          content: translate("Analyzing data...", activeLang) + ` Based on current simulations, I recommend increasing nitrogen levels by 10% in Field A. (Offline Demo Response)`,
         }]);
       } else {
-        const res = await api.post('/rag/ask', { question });
-        setMessages(prev => [...prev, { role: 'ai', content: res.data.data.answer }]);
+        setMessages(prev => [...prev, { role: 'ai', content: `Advisor connectivity issues. Error: ${getApiError(err)}` }]);
       }
-    } catch (err) {
-      setMessages(prev => [...prev, { role: 'ai', content: `Error: ${getApiError(err)}` }]);
     } finally {
       setLoading(false);
     }
@@ -148,7 +157,7 @@ export function SidePanel({ isOpen, onClose }: SidePanelProps) {
                     <div className="flex items-center gap-2 mt-1">
                       <span className="w-1.5 h-1.5 rounded-full bg-teal-500 animate-pulse" />
                       <span className="text-[10px] font-black text-teal-500 uppercase tracking-widest">
-                        {currentDomain} Focus Mode
+                        {isDemoMode ? 'Hybrid Demo' : 'Live Connected'} 
                       </span>
                     </div>
                   </div>
@@ -219,6 +228,19 @@ export function SidePanel({ isOpen, onClose }: SidePanelProps) {
                       : 'glass border border-white/5 text-white rounded-tl-none'
                   )}>
                     {m.content}
+                    
+                    {m.sources && m.sources.length > 0 && (
+                      <div className="mt-4 pt-4 border-t border-white/5 space-y-2">
+                        <p className="text-[8px] font-black uppercase tracking-widest text-teal-500/60">Verified Sources</p>
+                        <div className="flex flex-wrap gap-2">
+                          {m.sources.map((s, i) => (
+                            <span key={i} className="px-2 py-0.5 bg-white/5 rounded-md text-[9px] font-medium text-text-muted border border-white/5">
+                              {s}
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+                    )}
                   </div>
                   <span className="text-[10px] font-black text-text-muted uppercase tracking-widest mt-2 px-1 opacity-50">
                     {m.role === 'user' ? 'You' : 'AgriSense AI'} • {new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}

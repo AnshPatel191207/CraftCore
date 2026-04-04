@@ -1,4 +1,5 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import {
   Upload, FileText, CheckCircle, AlertCircle, Loader2,
   Beaker, Droplets, Leaf, FlaskConical, Eye, Camera,
@@ -13,6 +14,7 @@ import { cn } from '../lib/utils';
 import { fadeUp, staggerContainer } from '../lib/animations';
 import { ScrollReveal } from '../components/ScrollReveal';
 import { useLanguage } from '../components/ui/LanguageSwitcher';
+import { useInterval } from '../hooks/useInterval';
 import { analyzeSoil } from '../lib/fertilizerLogic';
 import type { SoilReport } from '../store/farmStore';
 
@@ -117,7 +119,7 @@ function ReportDetail({ report }: { report: SoilReport }) {
                     <CheckCircle size={12} className="text-teal-500" />
                   </div>
                   <span className="leading-relaxed">
-                    {t(rec.replace(/\s/g, '').replace(/[.-]/g, '')) || rec}
+                    {t(rec) || rec}
                   </span>
                 </div>
               ))}
@@ -143,16 +145,58 @@ const dropzoneBgStyle = {
 // ─── Main Page ────────────────────────────────────────────────────────────────
 
 export default function SoilReports() {
+  const navigate = useNavigate();
+  const { t } = useLanguage();
+
   const {
     soilReports,
     addSoilReport,
     updateSoilReport,
     isDemoMode,
-    setActivePage,
     updateAdvisory,
+    fetchDashboardData,
   } = useFarmStore();
 
-  const { t } = useLanguage();
+  // Load backend data if not in demo mode
+  useEffect(() => {
+    if (!isDemoMode) {
+      fetchDashboardData();
+    }
+  }, [isDemoMode, fetchDashboardData]);
+
+  // Polling for processing reports
+  const processingReports = soilReports.filter(r => r.status === 'processing');
+  
+  useInterval(() => {
+    if (processingReports.length > 0 && !isDemoMode) {
+      processingReports.forEach(async (report) => {
+        try {
+          const res = await api.get(`/soil-reports/${report.id}`);
+          const updatedReport = res.data.data.report || res.data.data;
+          if (updatedReport.status !== 'processing') {
+            updateSoilReport(report.id, {
+              status: updatedReport.status,
+              results: updatedReport.results
+            });
+            
+            // If completed, update advisory
+            if (updatedReport.status === 'complete' && updatedReport.results) {
+              const advisory = analyzeSoil({
+                ph: updatedReport.results.ph,
+                n: updatedReport.results.nitrogen,
+                p: updatedReport.results.phosphorus,
+                k: updatedReport.results.potassium,
+                moisture: updatedReport.results.moisture
+              });
+              updateAdvisory(advisory);
+            }
+          }
+        } catch (err) {
+          console.error('Polling error:', err);
+        }
+      });
+    }
+  }, processingReports.length > 0 ? 5000 : null);
 
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [uploading,  setUploading]  = useState(false);
@@ -170,27 +214,35 @@ export default function SoilReports() {
   // ── Demo simulation ──────────────────────────────────────────────────────
   const simulateAnalysis = useCallback((id: string) => {
     setTimeout(() => {
+      const results = {
+        ph:            +(5.5 + Math.random() * 2.5).toFixed(1),
+        nitrogen:      Math.round(150 + Math.random() * 250),
+        phosphorus:    Math.round(10  + Math.random() * 40),
+        potassium:     Math.round(100 + Math.random() * 200),
+        organicMatter: +(1.5 + Math.random() * 3.5).toFixed(1),
+        moisture:      Math.round(15  + Math.random() * 25),
+        texture: ['Sandy', 'Loamy', 'Clay', 'Sandy Loam', 'Silt Loam'][Math.floor(Math.random() * 5)],
+        healthScore: Math.round(45 + Math.random() * 50),
+        recommendations: [
+          'Monitor soil pH levels regularly and adjust with lime if needed.',
+          'Consider adding organic compost to improve soil structure.',
+          'Rotate crops to maintain nutrient balance in the soil.',
+          'Test micronutrient levels (Zinc, Iron, Manganese) for complete analysis.',
+        ],
+      };
+
       updateSoilReport(id, {
         status: 'complete',
-        results: {
-          ph:            +(5.5 + Math.random() * 2.5).toFixed(1),
-          nitrogen:      Math.round(150 + Math.random() * 250),
-          phosphorus:    Math.round(10  + Math.random() * 40),
-          potassium:     Math.round(100 + Math.random() * 200),
-          organicMatter: +(1.5 + Math.random() * 3.5).toFixed(1),
-          moisture:      Math.round(15  + Math.random() * 25),
-          texture: ['Sandy', 'Loamy', 'Clay', 'Sandy Loam', 'Silt Loam'][Math.floor(Math.random() * 5)],
-          healthScore: Math.round(45 + Math.random() * 50),
-          recommendations: [
-            'Monitor soil pH levels regularly and adjust with lime if needed.',
-            'Consider adding organic compost to improve soil structure.',
-            'Rotate crops to maintain nutrient balance in the soil.',
-            'Test micronutrient levels (Zinc, Iron, Manganese) for complete analysis.',
-          ],
-        },
+        results,
       });
 
-      const advisory = analyzeSoil({ ph: 6.8, n: 280, p: 22, k: 185, moisture: 28 });
+      const advisory = analyzeSoil({ 
+        ph: results.ph, 
+        n: results.nitrogen, 
+        p: results.phosphorus, 
+        k: results.potassium, 
+        moisture: results.moisture 
+      });
       updateAdvisory(advisory);
     }, 3000);
   }, [updateSoilReport, updateAdvisory]);
@@ -218,7 +270,12 @@ export default function SoilReports() {
           const res = await api.post('/soil-reports', formData, {
             headers: { 'Content-Type': 'multipart/form-data' },
           });
-          addSoilReport(res.data.data);
+          const newReport = res.data.data.report || res.data.data;
+          addSoilReport({ 
+            ...newReport, 
+            id: newReport._id || newReport.id,
+            status: newReport.status || 'processing' 
+          });
         }
       } catch (err) {
         console.error('Upload failed:', err);
@@ -275,7 +332,7 @@ export default function SoilReports() {
       moisture: parseFloat(moisture),
     });
     updateAdvisory(advisory);
-    setActivePage('fertilizer');
+    navigate('/app/fertilizer');
   };
 
 
@@ -376,11 +433,11 @@ export default function SoilReports() {
                 <div className="flex items-center justify-center gap-6 pt-2">
                   <div className="flex items-center gap-2 text-[10px] font-black text-text-muted uppercase tracking-widest bg-white/5 py-2 px-4 rounded-full border border-white/5">
                     <FileText size={12} className="text-teal-500" />
-                    PDF Reports
+                    {t('pdfReports') || 'PDF Reports'}
                   </div>
                   <div className="flex items-center gap-2 text-[10px] font-black text-text-muted uppercase tracking-widest bg-white/5 py-2 px-4 rounded-full border border-white/5">
                     <Eye size={12} className="text-amber-500" />
-                    Image Scans
+                    {t('imageScans') || 'Image Scans'}
                   </div>
                 </div>
               </div>
@@ -484,7 +541,7 @@ export default function SoilReports() {
                         </div>
 
                         <button
-                          onClick={() => setActivePage('fertilizer')}
+                          onClick={() => navigate('/app/fertilizer')}
                           className="w-full py-4 rounded-xl font-black text-sm uppercase tracking-widest transition-all flex items-center justify-center gap-2 group hover:scale-[1.02] active:scale-95"
                           style={{ background: 'var(--teal-500)', color: 'var(--bg)', boxShadow: '0 8px 32px rgba(var(--teal-rgb,20 184 166)/0.25)' }}
                         >
@@ -531,17 +588,17 @@ export default function SoilReports() {
                 <div>
                   <h3 className="font-display font-black text-text text-xl">{t('manualEntry') || 'Manual Entry'}</h3>
                   <p className="text-[10px] font-black text-text-muted uppercase tracking-widest mt-0.5">
-                    Enter your soil laboratory results
+                    {t('manualEntrySub') || 'Enter your soil laboratory results'}
                   </p>
                 </div>
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-5 relative z-10">
                 {([
-                  { key: 'ph',       label: 'pH Level',            placeholder: 'e.g. 6.5',  type: 'number', step: '0.1' },
-                  { key: 'n',        label: 'Nitrogen (kg/ha)',     placeholder: 'e.g. 120',  type: 'number' },
-                  { key: 'p',        label: 'Phosphorus (kg/ha)',   placeholder: 'e.g. 45',   type: 'number' },
-                  { key: 'k',        label: 'Potassium (kg/ha)',    placeholder: 'e.g. 180',  type: 'number' },
+                  { key: 'ph',       label: t('phLevel') || 'pH Level',            placeholder: 'e.g. 6.5',  type: 'number', step: '0.1' },
+                  { key: 'n',        label: t('nitrogen') || 'Nitrogen (kg/ha)',     placeholder: 'e.g. 120',  type: 'number' },
+                  { key: 'p',        label: t('phosphorus') || 'Phosphorus (kg/ha)',   placeholder: 'e.g. 45',   type: 'number' },
+                  { key: 'k',        label: t('potassium') || 'Potassium (kg/ha)',    placeholder: 'e.g. 180',  type: 'number' },
                 ] as const).map((f) => (
                   <div key={f.key} className="space-y-1.5">
                     <label className="text-[10px] font-black uppercase tracking-widest ml-1" style={{ color: 'var(--teal-500)' }}>
@@ -559,7 +616,7 @@ export default function SoilReports() {
                 ))}
                 <div className="md:col-span-2 space-y-1.5">
                   <label className="text-[10px] font-black uppercase tracking-widest ml-1" style={{ color: 'var(--teal-500)' }}>
-                    Moisture (%)
+                    {t('moisture') || 'Moisture (%)'}
                   </label>
                   <input
                     type="number"
@@ -576,7 +633,7 @@ export default function SoilReports() {
                 className="w-full mt-8 py-4 rounded-xl font-black text-sm uppercase tracking-widest transition-all flex items-center justify-center gap-2 group hover:scale-[1.02] active:scale-95 relative z-10"
                 style={{ background: 'var(--teal-500)', color: 'var(--bg)', boxShadow: '0 8px 32px rgba(var(--teal-rgb,20 184 166)/0.25)' }}
               >
-                Analyze with AI
+                {t('analyzeWithAI') || 'Analyze with AI'}
                 <ChevronRight size={18} className="group-hover:translate-x-1 transition-transform" />
               </button>
             </div>
@@ -665,7 +722,7 @@ export default function SoilReports() {
                             : 'bg-white/5 text-text-muted hover:bg-white/10 hover:text-text'
                         )}
                       >
-                        {expandedId === report.id ? 'Close Scan' : 'View Protocol'}
+                        {expandedId === report.id ? (t('closeScan') || 'Close Scan') : (t('viewProtocol') || 'View Protocol')}
                         <ChevronRight
                           size={14}
                           className={cn('transition-transform', expandedId === report.id && 'rotate-90')}

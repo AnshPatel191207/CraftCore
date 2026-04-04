@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ArrowLeft, ArrowRight, Mail, Lock, LogIn, Github, Chrome, AlertCircle, Sprout, Loader2 } from 'lucide-react';
+import { ArrowLeft, ArrowRight, Mail, Lock, LogIn, Github, Chrome, AlertCircle, Sprout, Loader2, Sparkles } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useFarmStore } from '../store/farmStore';
 import { useAuthStore } from '../store/authStore';
@@ -11,7 +11,7 @@ import { fadeUp, staggerContainer } from '../lib/animations';
 // ─── Login Page ───────────────────────────────────────────────────────────────
 
 export default function Login() {
-  const { setActivePage } = useFarmStore();
+  const { setDemoMode } = useFarmStore();
   const { login, isLoading }  = useAuthStore();
   const navigate = useNavigate();
 
@@ -25,7 +25,8 @@ export default function Login() {
 
     try {
       await login(email, password);
-      navigate('/app');
+      setDemoMode(false);
+      navigate('/app/dashboard');
     } catch (err: any) {
       setError(getApiError(err));
     }
@@ -98,7 +99,7 @@ export default function Login() {
             {/* Back to Home */}
             <motion.button
               variants={fadeUp}
-              onClick={() => setActivePage('landing')}
+              onClick={() => navigate('/')}
               className="group flex items-center gap-2 text-text-muted hover:text-text transition-colors mb-8 text-xs font-black uppercase tracking-widest"
             >
               <ArrowLeft size={16} className="group-hover:-translate-x-1 transition-transform" />
@@ -235,6 +236,18 @@ export default function Login() {
                       </>
                     )}
                   </button>
+
+                  <button
+                    type="button"
+                    onClick={() => {
+                       setDemoMode(true);
+                       navigate('/app/dashboard');
+                    }}
+                    className="w-full py-4 rounded-xl font-black text-xs uppercase tracking-widest transition-all flex items-center justify-center gap-3 bg-white/5 border border-white/10 hover:bg-white/10 text-white"
+                  >
+                    <Sparkles size={18} className="text-amber-500" />
+                    Try Demo Mode
+                  </button>
                 </form>
 
                 {/* Divider */}
@@ -264,7 +277,6 @@ export default function Login() {
                   New to KrishiSetu?{' '}
                   <Link
                     to="/register"
-                    onClick={() => setActivePage('signup')}
                     className="hover:underline transition-all"
                     style={{ color: 'var(--teal-500)' }}
                   >

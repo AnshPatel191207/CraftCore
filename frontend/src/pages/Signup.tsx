@@ -1,36 +1,40 @@
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ArrowLeft, Mail, Lock, User, UserPlus, Github, Chrome, AlertCircle } from 'lucide-react';
+import { ArrowLeft, Mail, Lock, User, UserPlus, Github, Chrome, AlertCircle, Sprout, Loader2, Sparkles } from 'lucide-react';
+import { useNavigate, Link } from 'react-router-dom';
 import { useFarmStore } from '../store/farmStore';
+import { useAuthStore } from '../store/authStore';
 import { useLanguage } from '../components/ui/LanguageSwitcher';
+import { getApiError } from '../lib/axios';
 
 export default function Signup() {
-  const { setActivePage } = useFarmStore();
+  const { setDemoMode } = useFarmStore();
+  const { register, isLoading } = useAuthStore();
   const { t } = useLanguage();
+  const navigate = useNavigate();
+
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
-  const [error, setError] = useState('');
+  const [error, setError] = useState<string | null>(null);
 
-  const handleSignup = (e: React.FormEvent) => {
+  const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError('');
+    setError(null);
 
     if (password !== confirmPassword) {
       setError('Passwords do not match');
       return;
     }
 
-    const newUser = {
-      name,
-      email,
-      password
-    };
-
-    localStorage.setItem('user', JSON.stringify(newUser));
-    localStorage.setItem('isLoggedIn', 'true');
-    setActivePage('soil');
+    try {
+      await register({ name, email, password });
+      setDemoMode(false);
+      navigate('/app/dashboard');
+    } catch (err: any) {
+      setError(getApiError(err));
+    }
   };
 
   return (
@@ -39,26 +43,27 @@ export default function Signup() {
       <motion.img
         src="https://images.unsplash.com/photo-1500382017468-9049fed747ef?q=80&w=2070&auto=format&fit=crop"
         alt="Cinematic Farm"
-        initial={{ x: "-100%", opacity: 0 }}
-        animate={{ x: "0%", opacity: 1 }}
-        transition={{ duration: 1.5, ease: "easeOut" }}
+        initial={{ x: '-100%', opacity: 0 }}
+        animate={{ x: '0%', opacity: 1 }}
+        transition={{ duration: 1.5, ease: 'easeOut' }}
         className="absolute inset-0 w-full h-full object-cover"
       />
 
-      {/* ── 2. DYNAMIC OVERLAY (FADE OVERLAY) ── */}
-      <motion.div 
+      {/* ── 2. GRADIENT OVERLAY ── */}
+      <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ delay: 0.5, duration: 1 }}
-        className="absolute inset-0 bg-gradient-to-r from-green-950 via-green-950/40 to-transparent z-10 pointer-events-none"
+        className="absolute inset-0 bg-gradient-to-r from-bg via-bg/60 to-transparent z-10 pointer-events-none"
       />
 
-      {/* ── 3. DARK LAYER + BLUR (APPLIED AFTER LOAD) ── */}
-      <motion.div 
+      {/* ── 3. BLUR LAYER ── */}
+      <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ delay: 1, duration: 0.8 }}
-        className="absolute inset-0 bg-green-950/20 backdrop-blur-[2px] z-20 pointer-events-none"
+        className="absolute inset-0 backdrop-blur-[2px] z-20 pointer-events-none"
+        style={{ background: 'rgba(var(--bg-rgb, 10 20 14) / 0.15)' }}
       />
 
       {/* ── 4. CONTENT WRAPPER ── */}
@@ -94,15 +99,28 @@ export default function Signup() {
           >
             {/* Back to Home */}
             <button 
-              onClick={() => setActivePage('landing')}
+              onClick={() => navigate('/')}
               className="group flex items-center gap-2 text-white/40 hover:text-white transition-colors mb-8 text-xs font-black uppercase tracking-widest"
             >
               <ArrowLeft size={16} className="group-hover:-translate-x-1 transition-transform" />
               Back to Home
             </button>
 
+            {/* Logo mark */}
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 1.6 }} className="flex items-center gap-3 mb-8">
+              <div className="w-12 h-12 rounded-2xl bg-teal-500/10 border border-teal-500/20 flex items-center justify-center"
+                style={{ boxShadow: '0 0 24px rgba(var(--teal-rgb, 20 184 166) / 0.15)' }}>
+                <Sprout size={24} style={{ color: 'var(--teal-500)' }} />
+              </div>
+              <div>
+                <p className="font-display font-black text-text leading-none">KrishiSetu</p>
+                <p className="text-[10px] font-black uppercase tracking-[0.2em] text-text-muted mt-0.5">AgriSense Portal</p>
+              </div>
+            </motion.div>
+
             {/* Signup Card */}
-            <div className="bg-green-900/40 backdrop-blur-xl border border-green-700/30 rounded-3xl p-8 md:p-10 shadow-2xl shadow-black/50">
+            <div className="glass rounded-[32px] p-8 md:p-10 border border-white/5 shadow-2xl shadow-black/50 relative overflow-hidden">
+              <div className="absolute inset-0 shimmer opacity-5 pointer-events-none" />
               <div className="space-y-8">
                 <div>
                   <h2 className="text-3xl font-display font-black text-white tracking-tight">Register</h2>
@@ -126,7 +144,7 @@ export default function Signup() {
                 <form onSubmit={handleSignup} className="space-y-4">
                   <div className="space-y-3">
                     <div className="relative group">
-                      <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-white/30 group-focus-within:text-teal-500 transition-colors">
+                      <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-text-faint group-focus-within:text-teal-500 transition-colors">
                         <User size={18} />
                       </div>
                       <input
@@ -135,12 +153,12 @@ export default function Signup() {
                         value={name}
                         onChange={(e) => setName(e.target.value)}
                         placeholder={t('fullName') || 'Full Name'}
-                        className="w-full pl-12 pr-4 py-3.5 bg-green-950/40 border border-white/10 rounded-2xl text-white placeholder-white/20 focus:outline-none focus:border-teal-500/50 focus:bg-white/10 transition-all font-bold focus:ring-2 focus:ring-teal-500/20"
+                        className="w-full pl-12 pr-4 py-3.5 bg-surface-2 border border-border rounded-2xl text-text placeholder-text-faint/50 focus:outline-none focus:border-teal-500/50 focus:ring-4 focus:ring-teal-500/10 transition-all font-bold"
                       />
                     </div>
 
                     <div className="relative group">
-                      <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-white/30 group-focus-within:text-teal-500 transition-colors">
+                      <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-text-faint group-focus-within:text-teal-500 transition-colors">
                         <Mail size={18} />
                       </div>
                       <input
@@ -149,12 +167,12 @@ export default function Signup() {
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
                         placeholder={t('emailAddress') || 'Email Address'}
-                        className="w-full pl-12 pr-4 py-3.5 bg-green-950/40 border border-white/10 rounded-2xl text-white placeholder-white/20 focus:outline-none focus:border-teal-500/50 focus:bg-white/10 transition-all font-bold focus:ring-2 focus:ring-teal-500/20"
+                        className="w-full pl-12 pr-4 py-3.5 bg-surface-2 border border-border rounded-2xl text-text placeholder-text-faint/50 focus:outline-none focus:border-teal-500/50 focus:ring-4 focus:ring-teal-500/10 transition-all font-bold"
                       />
                     </div>
 
                     <div className="relative group">
-                      <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-white/30 group-focus-within:text-teal-500 transition-colors">
+                      <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-text-faint group-focus-within:text-teal-500 transition-colors">
                         <Lock size={18} />
                       </div>
                       <input
@@ -163,12 +181,12 @@ export default function Signup() {
                         value={password}
                         onChange={(e) => setPassword(e.target.value)}
                         placeholder={t('password') || 'Password'}
-                        className="w-full pl-12 pr-4 py-3.5 bg-green-950/40 border border-white/10 rounded-2xl text-white placeholder-white/20 focus:outline-none focus:border-teal-500/50 focus:bg-white/10 transition-all font-bold focus:ring-2 focus:ring-teal-500/20"
+                        className="w-full pl-12 pr-4 py-3.5 bg-surface-2 border border-border rounded-2xl text-text placeholder-text-faint/50 focus:outline-none focus:border-teal-500/50 focus:ring-4 focus:ring-teal-500/10 transition-all font-bold"
                       />
                     </div>
 
                     <div className="relative group">
-                      <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-white/30 group-focus-within:text-teal-500 transition-colors">
+                      <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-text-faint group-focus-within:text-teal-500 transition-colors">
                         <Lock size={18} />
                       </div>
                       <input
@@ -177,17 +195,36 @@ export default function Signup() {
                         value={confirmPassword}
                         onChange={(e) => setConfirmPassword(e.target.value)}
                         placeholder={t('confirmPassword') || 'Confirm Password'}
-                        className="w-full pl-12 pr-4 py-3.5 bg-green-950/40 border border-white/10 rounded-2xl text-white placeholder-white/20 focus:outline-none focus:border-teal-500/50 focus:bg-white/10 transition-all font-bold focus:ring-2 focus:ring-teal-500/20"
+                        className="w-full pl-12 pr-4 py-3.5 bg-surface-2 border border-border rounded-2xl text-text placeholder-text-faint/50 focus:outline-none focus:border-teal-500/50 focus:ring-4 focus:ring-teal-500/10 transition-all font-bold"
                       />
                     </div>
                   </div>
 
                   <button
                     type="submit"
-                    className="w-full py-4 bg-teal-500 hover:bg-teal-400 text-bg font-black rounded-2xl transition-all shadow-xl shadow-teal-500/20 active:scale-[0.98] flex items-center justify-center gap-3 mt-4"
+                    disabled={isLoading}
+                    className="w-full py-4 bg-teal-500 hover:bg-teal-400 text-bg font-black rounded-2xl transition-all shadow-xl shadow-teal-500/20 active:scale-[0.98] flex items-center justify-center gap-3 mt-4 disabled:opacity-50 disabled:cursor-not-allowed text-sm uppercase tracking-widest"
                   >
-                    <UserPlus size={20} />
-                    {t('createAccountBtn') || 'CREATE YOUR FARM ACCOUNT'}
+                    {isLoading ? (
+                      <Loader2 size={20} className="animate-spin" />
+                    ) : (
+                      <>
+                        <UserPlus size={20} />
+                        {t('createAccountBtn') || 'CREATE YOUR FARM ACCOUNT'}
+                      </>
+                    )}
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => {
+                        setDemoMode(true);
+                        navigate('/app/dashboard');
+                    }}
+                    className="w-full py-4 rounded-xl font-black text-xs uppercase tracking-widest transition-all flex items-center justify-center gap-3 bg-white/5 border border-white/10 hover:bg-white/10 text-white"
+                  >
+                    <Sparkles size={18} className="text-amber-500" />
+                    Try Demo Mode
                   </button>
                 </form>
 
@@ -213,12 +250,12 @@ export default function Signup() {
 
                 <p className="text-center text-xs font-bold text-white/40">
                   Already have an account? {' '}
-                  <button 
-                    onClick={() => setActivePage('login')}
+                  <Link 
+                    to="/login"
                     className="text-teal-500 hover:underline transition-all"
                   >
                     Login
-                  </button>
+                  </Link>
                 </p>
               </div>
             </div>

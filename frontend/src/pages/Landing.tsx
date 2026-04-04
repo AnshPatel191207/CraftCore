@@ -1,11 +1,13 @@
-import { Microscope, ArrowRight, Zap, Target, Globe, BookOpen } from 'lucide-react';
+import { Microscope, ArrowRight, Zap, Target, Globe, BookOpen, Sparkles } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import LanguageSwitcher, { useLanguage } from '../components/ui/LanguageSwitcher';
 import { useFarmStore } from '../store/farmStore';
 import { ScrollReveal } from '../components/ScrollReveal';
 
 export default function Landing() {
   const { t } = useLanguage();
-  const { setActivePage } = useFarmStore();
+  const navigate = useNavigate();
+  const { setDemoMode } = useFarmStore();
 
   return (
     <div className="space-y-24 pb-20">
@@ -35,25 +37,32 @@ export default function Landing() {
 
               <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-8">
                 <button 
-                  onClick={() => {
-                    const isLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
-                    if (isLoggedIn) {
-                      setActivePage('soil');
-                    } else {
-                      setActivePage('login');
-                    }
-                  }}
-                  className="group relative px-8 py-4 bg-teal-500 text-bg font-black rounded-2xl overflow-hidden transition-all hover:scale-105 active:scale-95"
+                  onClick={() => navigate('/login')}
+                  className="px-8 py-4 glass border border-white/10 text-white font-black rounded-2xl hover:bg-white/5 transition-all text-sm uppercase tracking-widest"
+                >
+                  Sign In
+                </button>
+
+                <button 
+                  onClick={() => navigate('/register')}
+                  className="group relative px-8 py-4 bg-teal-500 text-bg font-black rounded-2xl overflow-hidden transition-all hover:scale-105 active:scale-95 text-sm uppercase tracking-widest shadow-xl shadow-teal-500/20"
                 >
                   <div className="relative z-10 flex items-center gap-2">
-                    {t('analyseMySoil')}
+                    Get Started Free
                     <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform" />
                   </div>
                   <div className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/20 to-white/0 -translate-x-full group-hover:translate-x-full transition-transform duration-1000" />
                 </button>
                 
-                <button className="px-8 py-4 glass border border-border text-text font-black rounded-2xl hover:bg-white/5 transition-all">
-                  {t('howItWorks')}
+                <button 
+                  onClick={() => {
+                    setDemoMode(true);
+                    navigate('/app/dashboard');
+                  }}
+                  className="px-8 py-4 bg-amber-500/10 border border-amber-500/30 text-amber-500 font-black rounded-2xl hover:bg-amber-500/20 transition-all flex items-center gap-2 text-sm uppercase tracking-widest"
+                >
+                  <Sparkles size={18} />
+                  Try Demo
                 </button>
               </div>
             </div>
@@ -169,7 +178,10 @@ export default function Landing() {
               <p className="text-text-muted font-bold max-w-xl mx-auto">
                 {t('powerfulAgriIntel')}
               </p>
-              <button className="px-10 py-4 bg-white text-bg font-black rounded-2xl hover:scale-105 transition-transform">
+              <button 
+                onClick={() => navigate('/register')}
+                className="px-10 py-4 bg-white text-bg font-black rounded-2xl hover:scale-105 transition-transform text-sm uppercase tracking-widest"
+              >
                 {t('getStartedFree')}
               </button>
             </div>

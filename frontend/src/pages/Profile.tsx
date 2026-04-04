@@ -13,7 +13,9 @@ import {
   Activity,
   CheckCircle2
 } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import { useFarmStore } from '../store/farmStore';
+import { useAuthStore } from '../store/authStore';
 import { ScrollReveal } from '../components/ScrollReveal';
 
 interface UserProfile {
@@ -25,7 +27,9 @@ interface UserProfile {
 }
 
 export default function Profile() {
-  const { farmerName, farmName, totalAcres, crops, soilReports, setActivePage } = useFarmStore();
+  const { farmerName, farmName, totalAcres, crops, soilReports, setDemoMode } = useFarmStore();
+  const { logout } = useAuthStore();
+  const navigate = useNavigate();
   
   const [isEditing, setIsEditing] = useState(false);
   const [profile, setProfile] = useState<UserProfile>({
@@ -63,8 +67,9 @@ export default function Profile() {
   };
 
   const handleLogout = () => {
-    localStorage.removeItem('isLoggedIn');
-    setActivePage('login');
+    logout();
+    setDemoMode(false);
+    navigate('/');
   };
 
   const stats = [
@@ -248,7 +253,7 @@ export default function Profile() {
                <div className="space-y-2">
                   <p className="text-[10px] font-black text-white/30 uppercase tracking-widest">Quick Actions</p>
                   <div className="flex gap-2">
-                    <button onClick={() => setActivePage('soil')} className="flex-1 py-3 glass border border-white/10 rounded-xl text-[10px] font-black uppercase tracking-widest text-white/40 hover:text-white hover:border-teal-500/30 transition-all">
+                    <button onClick={() => navigate('/app/soil')} className="flex-1 py-3 glass border border-white/10 rounded-xl text-[10px] font-black uppercase tracking-widest text-white/40 hover:text-white hover:border-teal-500/30 transition-all">
                       View Documents
                     </button>
                     <button className="flex-1 py-3 glass border border-white/10 rounded-xl text-[10px] font-black uppercase tracking-widest text-white/40 hover:text-white hover:border-teal-500/30 transition-all">

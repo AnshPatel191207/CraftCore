@@ -19,12 +19,34 @@ import { useLanguage } from '../components/ui/LanguageSwitcher';
 import { ScrollReveal } from '../components/ScrollReveal';
 import { useState, useRef } from 'react';
 
+const COLORS = ['#14b8a6', '#10b981', '#34d399', '#059669', '#065f46'];
+
+const staggerContainer = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.1
+    }
+  }
+};
+
+interface CropEntry {
+  totalLand: string;
+  usedLand: string;
+  cropName: string;
+  area: number;
+  plantingDate: string;
+  harvestDate: string;
+  healthStatus: string;
+}
+
 
 export default function Crops() {
   const { crops: storeCrops, totalAcres: storeTotalAcres } = useFarmStore();
   
   // Multiple Crops State
-  const [crops, setCrops] = useState<any[]>([]);
+  const [crops, setCrops] = useState<CropEntry[]>([]);
   const [showForm, setShowForm] = useState(true);
   const [editIndex, setEditIndex] = useState<number | null>(null);
 
@@ -47,8 +69,10 @@ export default function Crops() {
   };
 
   const loadDummyData = () => {
-    const originalCrops = [
+    const originalCrops: CropEntry[] = [
       {
+        totalLand: "120",
+        usedLand: "40",
         cropName: "Corn",
         area: 40,
         plantingDate: "2024-01-10",
@@ -56,6 +80,8 @@ export default function Crops() {
         healthStatus: "Good"
       },
       {
+        totalLand: "120",
+        usedLand: "30",
         cropName: "Wheat",
         area: 30,
         plantingDate: "2024-02-01",
@@ -71,7 +97,7 @@ export default function Crops() {
   const handleEdit = (index: number) => {
     const crop = crops[index];
     setFormData({
-      totalLand: formData.totalLand, // Keep total land same
+      totalLand: crop.totalLand,
       usedLand: crop.area.toString(),
       cropName: crop.cropName,
       area: crop.area.toString(),
@@ -85,7 +111,7 @@ export default function Crops() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    const newCrop = {
+    const newCrop: CropEntry = {
       ...formData,
       area: parseInt(formData.area)
     };
@@ -103,10 +129,10 @@ export default function Crops() {
   };
 
   // Logic to determine which data to use
-  const displayTotalLand = crops.length > 0 ? parseInt(formData.totalLand) : storeTotalAcres;
+  const displayTotalLand = crops.length > 0 ? parseInt(crops[0].totalLand) : storeTotalAcres;
   const displayCrops = crops.length > 0 ? crops.map(c => ({
     name: c.cropName,
-    area: parseInt(c.area),
+    area: c.area,
     stage: 'Growth Phase',
     health: c.healthStatus === 'Good' ? 95 : c.healthStatus === 'Moderate' ? 65 : 35,
     plantedDate: c.plantingDate,
@@ -874,7 +900,7 @@ export default function Crops() {
           </div>
         </div>
       </ScrollReveal>
-    </div>
+    </motion.div>
   );
 }
 

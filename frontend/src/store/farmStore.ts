@@ -229,8 +229,7 @@ interface FarmState {
   currentAdvisory: any | null;
   pendingChatQuery: string | null;
 
-  // Navigation / UI
-  activePage: string;
+  // UI
   sidebarOpen: boolean;
   isPanelOpen: boolean;
   isCommandPaletteOpen: boolean;
@@ -238,6 +237,7 @@ interface FarmState {
 
   // Actions — data
   setDemoMode: (enabled: boolean) => void;
+  syncIdentity: (user: any) => void;
   fetchDashboardData: () => Promise<void>;
   addSoilReport: (report: SoilReport) => void;
   updateSoilReport: (id: string, updates: Partial<SoilReport>) => void;
@@ -249,7 +249,6 @@ interface FarmState {
   setPendingChatQuery: (query: string | null) => void;
 
   // Actions — UI
-  setActivePage: (page: string) => void;
   toggleSidebar: () => void;
   setPanelOpen: (open: boolean) => void;
   togglePanel: () => void;
@@ -287,7 +286,6 @@ export const useFarmStore = create<FarmState>()(
       pendingChatQuery: null,
 
       // ── UI ──────────────────────────────────────────────────────────────────
-      activePage:           'dashboard',
       sidebarOpen:          false,
       isPanelOpen:          false,
       isCommandPaletteOpen: false,
@@ -307,30 +305,50 @@ export const useFarmStore = create<FarmState>()(
         });
       },
 
+      syncIdentity: (user) => {
+        if (!user) return;
+        set({
+          farmerName: user.name || 'Rajesh Kumar',
+          farmName:   user.farmName || 'Green Valley Farm',
+          totalAcres: user.totalAcres || 0,
+        });
+      },
+
       fetchDashboardData: async () => {
         const { isDemoMode } = get();
         set({ isLoading: true, error: null });
 
         try {
           if (isDemoMode) {
-            // Simulate network delay in demo mode
+            // Simulate network delay in demo mode (600ms as requested)
             await new Promise((res) => setTimeout(res, 600));
             set({
               crops:       mockCrops,
               advisories:  mockAdvisories,
               stats:       mockStats,
               activityFeed: mockActivityFeed,
+              soilReports: mockSoilReports,
             });
           } else {
-            const [cropsRes, advisoriesRes, statsRes] = await Promise.all([
+            // Live API calls in parallel
+            const [cropsRes, advisoriesRes, statsRes, soilRes] = await Promise.all([
               api.get('/crops'),
               api.get('/advisories'),
               api.get('/dashboard/stats'),
+              api.get('/soil-reports'),
             ]);
+
+            // Map _id to id if necessary for SoilReport
+            const mappedSoil = (soilRes.data.data || []).map((sr: any) => ({
+              ...sr,
+              id: sr._id || sr.id
+            }));
+
             set({
               crops:      cropsRes.data.data      ?? [],
               advisories: advisoriesRes.data.data ?? [],
               stats:      statsRes.data.data       ?? null,
+              soilReports: mappedSoil,
             });
           }
         } catch (err: any) {
@@ -399,7 +417,6 @@ export const useFarmStore = create<FarmState>()(
 
       // ── Actions — UI ────────────────────────────────────────────────────────
 
-      setActivePage: (page) => set({ activePage: page, sidebarOpen: false }),
       toggleSidebar: () => set((state) => ({ sidebarOpen: !state.sidebarOpen })),
       setPanelOpen:  (open) => set({ isPanelOpen: open }),
       togglePanel:   () => set((state) => ({ isPanelOpen: !state.isPanelOpen })),
@@ -411,7 +428,7 @@ export const useFarmStore = create<FarmState>()(
     {
       name: 'farm-store',
       // Only persist UI preferences and mode — never raw data (fetched fresh on load)
-      partialify: (state) => ({
+      partialize: (state: FarmState) => ({
         isDemoMode:    state.isDemoMode,
         currentDomain: state.currentDomain,
         farmerName:    state.farmerName,
@@ -429,7 +446,6 @@ export const useFarmStore = create<FarmState>()(
 export const useIsDemo    = ()  => useFarmStore((s) => s.isDemoMode);
 export const useIsLoading = ()  => useFarmStore((s) => s.isLoading);
 export const useStoreError = () => useFarmStore((s) => s.error);
-export const useActivePage = () => useFarmStore((s) => s.activePage);
 export const useDomain     = () => useFarmStore((s) => s.currentDomain);
 
 export const useCrops      = () => useFarmStore((s) => s.crops);
