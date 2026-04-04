@@ -1,8 +1,11 @@
 import React, { useEffect } from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
+import { Bot, Sparkles } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
+
+// Stores
 import { useAuthStore } from './store/authStore';
 import { useFarmStore } from './store/farmStore';
-import { AnimatePresence, motion } from 'framer-motion';
 
 // Layout & Components
 import Topbar from './components/layout/Topbar';
@@ -11,29 +14,31 @@ import { CommandPalette } from './components/ui/CommandPalette';
 import ErrorBoundary from './components/ui/ErrorBoundary';
 
 // Pages
+import Landing from './pages/Landing';
+import Login from './pages/Login';
+import Register from './pages/Register';
 import Dashboard from './pages/Dashboard';
 import SoilReports from './pages/SoilReports';
 import Advisory from './pages/Advisory';
 import Crops from './pages/Crops';
 import Weather from './pages/Weather';
-import Login from './pages/Login';
-import Register from './pages/Register';
-import Landing from './pages/Landing';
 
-// Auth Guard
+// Socket
+import { initSocket, disconnectSocket } from './lib/socket';
+
+// ─── Auth Guard ───────────────────────────────────────────
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   const { isAuthenticated } = useAuthStore();
-  
-  if (!isAuthenticated) {
-    return <Navigate to="/login" replace />;
-  }
-
-  return <>{children}</>;
+  return isAuthenticated ? <>{children}</> : <Navigate to="/login" replace />;
 };
 
-// Main Authenticated Layout
+// ─── Main App Layout (authenticated) ─────────────────────
 const MainAppContent = () => {
-  const { activePage, isPanelOpen, setPanelOpen, isCommandPaletteOpen, setCommandPaletteOpen } = useFarmStore();
+  const {
+    activePage,
+    isPanelOpen, setPanelOpen,
+    isCommandPaletteOpen, setCommandPaletteOpen,
+  } = useFarmStore();
 
   const renderPage = () => {
     switch (activePage) {
@@ -47,94 +52,92 @@ const MainAppContent = () => {
   };
 
   return (
-    <div className="min-h-screen bg-bg text-text selection:bg-teal-500/30">
+    <div className="min-h-screen bg-bg text-text selection:bg-teal-500 selection:text-white overflow-x-hidden">
       <Topbar />
-      <main className="pt-20 px-6 max-w-[1600px] mx-auto pb-12">
-        <AnimatePresence mode="wait">
-          <motion.div
-            key={activePage}
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -10 }}
-            transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
-          >
-            {renderPage()}
-          </motion.div>
-        </AnimatePresence>
+
+      <main className="w-full min-h-screen transition-all duration-500 ease-spring relative z-10">
+        <div className="max-w-6xl mx-auto p-4 md:p-6 lg:p-8 pt-20 lg:pt-24">
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={activePage}
+              initial={{ opacity: 0, y: 15 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -15 }}
+              transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
+            >
+              {renderPage()}
+            </motion.div>
+          </AnimatePresence>
+        </div>
       </main>
-      
-      <SidePanel 
-        isOpen={isPanelOpen} 
-        onClose={() => setPanelOpen(false)} 
-      />
-      
-      <CommandPalette 
-        isOpen={isCommandPaletteOpen} 
-        setIsOpen={setCommandPaletteOpen} 
-      />
-      
-      {/* AI Trigger FAB (Desktop) */}
-      <motion.button
-        whileHover={{ scale: 1.1, rotate: 5 }}
-        whileTap={{ scale: 0.9 }}
-        onClick={() => setPanelOpen(true)}
-        className="fixed bottom-8 right-8 w-16 h-16 rounded-[24px] bg-teal-500 text-bg shadow-2xl shadow-teal-500/40 flex items-center justify-center z-50 border-4 border-bg group"
+
+      {/* Premium FAB — AI Advisor Toggle */}
+      <motion.div
+        initial={{ scale: 0, opacity: 0 }}
+        animate={{ scale: 1, opacity: 1 }}
+        transition={{ delay: 1, type: 'spring', stiffness: 200, damping: 20 }}
+        className="fixed bottom-8 right-8 z-50 group"
       >
-        <motion.div
-          animate={{ scale: [1, 1.2, 1] }}
-          transition={{ repeat: Infinity, duration: 2 }}
-          className="absolute inset-0 rounded-[20px] bg-white/20 opacity-0 group-hover:opacity-100 transition-opacity"
-        />
-        <svg className="w-8 h-8" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-          <path d="M12 8V4H8" />
-          <rect width="16" height="12" x="4" y="8" rx="2" />
-          <path d="M2 14h2" />
-          <path d="M20 14h2" />
-          <path d="M15 13v2" />
-          <path d="M9 13v2" />
-        </svg>
-      </motion.button>
+        <button
+          onClick={() => setPanelOpen(!isPanelOpen)}
+          className="relative w-16 h-16 rounded-[24px] bg-teal-500 shadow-2xl shadow-teal-500/50 flex items-center justify-center text-bg transition-all hover:scale-110 active:scale-95 hover:rotate-3 overflow-hidden"
+        >
+          <div className="absolute inset-0 bg-gradient-to-tr from-white/20 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+
+          <AnimatePresence mode="wait">
+            {isPanelOpen ? (
+              <motion.div key="close" initial={{ opacity: 0, rotate: -90 }} animate={{ opacity: 1, rotate: 0 }} exit={{ opacity: 0, rotate: 90 }}>
+                <Sparkles size={28} />
+              </motion.div>
+            ) : (
+              <motion.div key="bot" initial={{ opacity: 0, rotate: 90 }} animate={{ opacity: 1, rotate: 0 }} exit={{ opacity: 0, rotate: -90 }}>
+                <Bot size={30} />
+              </motion.div>
+            )}
+          </AnimatePresence>
+
+          {/* Status dot */}
+          <div className="absolute -top-1 -right-1 w-5 h-5 bg-amber-500 rounded-full border-[3px] border-bg flex items-center justify-center shadow-lg">
+            <div className="w-1.5 h-1.5 bg-white rounded-full animate-pulse" />
+          </div>
+        </button>
+
+        {/* Tooltip */}
+        <div className="absolute right-full mr-4 top-1/2 -translate-y-1/2 px-4 py-2 glass border border-white/10 rounded-xl whitespace-nowrap text-[10px] font-black text-white uppercase tracking-widest opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity shadow-2xl">
+          Ask AI Advisor
+        </div>
+      </motion.div>
+
+      <SidePanel isOpen={isPanelOpen} onClose={() => setPanelOpen(false)} />
+      <CommandPalette isOpen={isCommandPaletteOpen} setIsOpen={setCommandPaletteOpen} />
+
+      {/* Background noise texture */}
+      <div className="fixed inset-0 pointer-events-none opacity-[0.03] z-[200] mix-blend-overlay">
+        <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')]" />
+      </div>
     </div>
   );
 };
 
-import { initSocket, disconnectSocket } from './lib/socket';
-
+// ─── Root App ─────────────────────────────────────────────
 export default function App() {
   const { checkAuth, isAuthenticated, token } = useAuthStore();
 
-  useEffect(() => {
-    checkAuth();
-  }, [checkAuth]);
+  useEffect(() => { checkAuth(); }, [checkAuth]);
 
   useEffect(() => {
-    if (isAuthenticated && token) {
-      initSocket(token);
-    } else {
-      disconnectSocket();
-    }
+    if (isAuthenticated && token) initSocket(token);
+    else disconnectSocket();
   }, [isAuthenticated, token]);
 
   return (
     <ErrorBoundary>
       <Routes>
-        {/* Public Routes */}
-        <Route path="/" element={<Landing />} />
-        <Route path="/login" element={<Login />} />
+        <Route path="/"         element={<Landing />} />
+        <Route path="/login"    element={<Login />} />
         <Route path="/register" element={<Register />} />
-
-        {/* Protected Dashboard */}
-        <Route
-          path="/app/*"
-          element={
-            <ProtectedRoute>
-              <MainAppContent />
-            </ProtectedRoute>
-          }
-        />
-
-        {/* Fallback */}
-        <Route path="*" element={<Navigate to="/" replace />} />
+        <Route path="/app/*"    element={<ProtectedRoute><MainAppContent /></ProtectedRoute>} />
+        <Route path="*"         element={<Navigate to="/" replace />} />
       </Routes>
     </ErrorBoundary>
   );
