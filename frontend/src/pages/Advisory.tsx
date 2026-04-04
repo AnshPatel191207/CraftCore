@@ -5,6 +5,22 @@ import {
   AlertTriangle, AlertOctagon, Info, Sparkles,
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { 
+  AlertTriangle, 
+  Filter, 
+  Search, 
+  CheckCircle2, 
+  Clock, 
+  MapPin, 
+  ArrowRight, 
+  ShieldAlert, 
+  Bug, 
+  Sun, 
+  Sprout, 
+  TrendingUp,
+  Activity,
+  Import
+} from 'lucide-react';
 import { useFarmStore } from '../store/farmStore';
 import { cn } from '../lib/utils';
 import { fadeUp, staggerContainer } from '../lib/animations';
@@ -126,7 +142,7 @@ function AdvisoryCard({ advisory }: { advisory: AdvisoryType }) {
               </p>
             )}
           </div>
-        </div>
+        </motion.div>
       </div>
 
       {/* Expanded body */}
