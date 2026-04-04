@@ -1,31 +1,28 @@
-
 <div align="center">
 
 <!-- Animated Banner -->
-<a href="https://spectacular-madeleine-37b944.netlify.app/" target="_blank">
-  <img src="https://capsule-render.vercel.app/api?type=waving&color=0:16a34a,50:15803d,100:052e16&height=220&section=header&text=KrishiSetu&fontSize=72&fontColor=ffffff&animation=fadeIn&fontAlignY=38&desc=Advanced%20Farm%20Intelligence%20Platform&descAlignY=58&descSize=20&descColor=bbf7d0" width="100%"/>
+<a href="https://craft-core-sage.vercel.app/" target="_blank">
+  <img src="https://capsule-render.vercel.app/api?type=waving&color=0:16a34a,50:15803d,100:052e16&height=220&section=header&text=KrishiSetu&fontSize=72&fontColor=ffffff&animation=fadeIn&fontAlignY=38&desc=Advanced%20Farm%20Intelligence%20Platform&descAlignY=58&descSize=20&descColor=bbf7d0" width="100%" />
 </a>
 
 <!-- Typing Animation -->
-<a href="https://spectacular-madeleine-37b944.netlify.app/" target="_blank">
-  <img src="https://readme-typing-svg.demolab.com?font=Fira+Code&weight=700&size=22&pause=1000&color=16A34A&center=true&vCenter=true&width=600&lines=🌾+Smart+Farming%2C+Smarter+Decisions;🤖+AI-Powered+Crop+Intelligence;💧+Precision+Agriculture+Solutions;📊+Real-Time+Farm+Analytics;🌿+Empowering+Every+Farmer" alt="Typing SVG" />
+<a href="https://craft-core-sage.vercel.app/" target="_blank">
+  <img src="https://readme-typing-svg.herokuapp.com?font=Fira%20Code&weight=700&size=22&duration=3000&pause=1000&color=16A34A&center=true&vCenter=true&width=700&lines=🌾+Smart+Farming%2C+Smarter+Decisions;🤖+AI-Powered+Crop+Intelligence;💧+Precision+Agriculture+Solutions;📊+Real-Time+Farm+Analytics;🌿+Empowering+Every+Farmer" />
 </a>
 
 <br/>
 
-<!-- Live Demo Badge -->
-<a href="https://spectacular-madeleine-37b944.netlify.app/" target="_blank">
-  <img src="https://img.shields.io/badge/🚀%20Live%20Demo-Visit%20KrishiSetu-16a34a?style=for-the-badge&logoColor=white" alt="Live Demo"/>
+<!-- Live Demo Button -->
+<a href="https://craft-core-sage.vercel.app/" target="_blank">
+  <img src="https://img.shields.io/badge/🚀%20LIVE%20DEMO-VISIT%20KRISHISETU-16a34a?style=for-the-badge" />
 </a>
 
 <br/><br/>
 
-<!-- Status Badges -->
-[![Netlify Status](https://api.netlify.com/api/v1/badges/placeholder/deploy-status)](https://spectacular-madeleine-37b944.netlify.app/)
 ![Platform](https://img.shields.io/badge/Platform-Web%20App-16a34a?style=flat-square)
-![Agriculture](https://img.shields.io/badge/Domain-AgriTech-15803d?style=flat-square)
+![Domain](https://img.shields.io/badge/Domain-AgriTech-15803d?style=flat-square)
 ![AI Powered](https://img.shields.io/badge/AI-Powered-052e16?style=flat-square)
-![License](https://img.shields.io/badge/License-MIT-bbf7d0?style=flat-square)
+![Deployment](https://img.shields.io/badge/Deployment-Vercel-success?style=flat-square)
 
 </div>
 
@@ -283,7 +280,7 @@ Contributions are what make the open-source community amazing! Any contributions
 
 **Made with 💚 for Indian Farmers | KrishiSetu — Bridging Technology & Agriculture**
 
-🔗 **[spectacular-madeleine-37b944.netlify.app](https://spectacular-madeleine-37b944.netlify.app/)**
+🔗 **[KrishiSetu](https://craft-core-sage.vercel.app/)**
 
 *"When farmers prosper, nations flourish."*
 
