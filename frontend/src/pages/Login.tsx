@@ -192,7 +192,7 @@ export default function Login() {
 
                 <div className="grid grid-cols-2 gap-4">
                   <button 
-                    onClick={() => window.location.href = 'http://localhost:5000/api/auth/google'}
+                    onClick={() => window.location.href = `${import.meta.env.VITE_API_URL || 'http://localhost:5000/api'}/auth/google`}
                     className="flex items-center justify-center gap-2 py-3 bg-white/5 border border-white/10 rounded-xl hover:bg-white/10 transition-all text-white font-bold text-[10px] uppercase tracking-widest"
                   >
                     <Chrome size={18} className="text-green-500" />
