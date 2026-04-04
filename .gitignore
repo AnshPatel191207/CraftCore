@@ -25,7 +25,7 @@ dist-ssr/
 build/
 
 # Remote environment variables
-.env
+# .env  # Temporarily disabled for hackathon
 .env.local
 .env.development.local
 .env.test.local

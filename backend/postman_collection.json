@@ -1,0 +1,158 @@
+{
+	"info": {
+		"_postman_id": "agrisense-v1-api",
+		"name": "AgriSense V1 API",
+		"description": "Comprehensive API collection for testing AgriSense AI backend v1.0",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Auth",
+			"item": [
+				{
+					"name": "Register",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"Farmer Ravi\",\n    \"email\": \"ravi@farm.com\",\n    \"password\": \"password123\",\n    \"farmName\": \"Green Acres\",\n    \"totalAcres\": 10,\n    \"location\": {\n        \"state\": \"Maharashtra\",\n        \"district\": \"Nashik\",\n        \"lat\": 19.9975,\n        \"lng\": 73.7898\n    }\n}",
+							"options": { "raw": { "language": "json" } }
+						},
+						"url": { "raw": "{{base_url}}/api/v1/auth/register", "host": ["{{base_url}}"], "path": ["api", "v1", "auth", "register"] }
+					}
+				},
+				{
+					"name": "Login",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"email\": \"ravi@farm.com\",\n    \"password\": \"password123\"\n}",
+							"options": { "raw": { "language": "json" } }
+						},
+						"url": { "raw": "{{base_url}}/api/v1/auth/login", "host": ["{{base_url}}"], "path": ["api", "v1", "auth", "login"] }
+					}
+				},
+				{
+					"name": "Refresh Token",
+					"request": {
+						"method": "POST",
+						"url": { "raw": "{{base_url}}/api/v1/auth/refresh", "host": ["{{base_url}}"], "path": ["api", "v1", "auth", "refresh"] }
+					}
+				}
+			]
+		},
+		{
+			"name": "Soil Reports",
+			"item": [
+				{
+					"name": "Upload Report (Multipart)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{ "key": "Authorization", "value": "Bearer {{jwt_token}}" }
+						],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{ "key": "file", "type": "file", "src": [] }
+							]
+						},
+						"url": { "raw": "{{base_url}}/api/v1/soil-reports", "host": ["{{base_url}}"], "path": ["api", "v1", "soil-reports"] }
+					}
+				},
+				{
+					"name": "Get Latest Report",
+					"request": {
+						"method": "GET",
+						"header": [
+							{ "key": "Authorization", "value": "Bearer {{jwt_token}}" }
+						],
+						"url": { "raw": "{{base_url}}/api/v1/soil-reports/latest", "host": ["{{base_url}}"], "path": ["api", "v1", "soil-reports", "latest"] }
+					}
+				}
+			]
+		},
+		{
+			"name": "Dashboard",
+			"item": [
+				{
+					"name": "Get Stats",
+					"request": {
+						"method": "GET",
+						"header": [
+							{ "key": "Authorization", "value": "Bearer {{jwt_token}}" }
+						],
+						"url": { "raw": "{{base_url}}/api/v1/dashboard/stats", "host": ["{{base_url}}"], "path": ["api", "v1", "dashboard", "stats"] }
+					}
+				},
+				{
+					"name": "Nutrient Profile",
+					"request": {
+						"method": "GET",
+						"header": [
+							{ "key": "Authorization", "value": "Bearer {{jwt_token}}" }
+						],
+						"url": { "raw": "{{base_url}}/api/v1/dashboard/nutrients", "host": ["{{base_url}}"], "path": ["api", "v1", "dashboard", "nutrients"] }
+					}
+				}
+			]
+		},
+		{
+			"name": "Crops",
+			"item": [
+				{
+					"name": "Get All Crops",
+					"request": {
+						"method": "GET",
+						"header": [
+							{ "key": "Authorization", "value": "Bearer {{jwt_token}}" }
+						],
+						"url": { "raw": "{{base_url}}/api/v1/crops", "host": ["{{base_url}}"], "path": ["api", "v1", "crops"] }
+					}
+				},
+				{
+					"name": "Add Crop",
+					"request": {
+						"method": "POST",
+						"header": [
+							{ "key": "Authorization", "value": "Bearer {{jwt_token}}" }
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"Wheat\",\n    \"area\": 5,\n    \"stage\": \"Vegetative\",\n    \"plantedDate\": \"2024-11-01\",\n    \"expectedHarvest\": \"2025-03-30\"\n}",
+							"options": { "raw": { "language": "json" } }
+						},
+						"url": { "raw": "{{base_url}}/api/v1/crops", "host": ["{{base_url}}"], "path": ["api", "v1", "crops"] }
+					}
+				}
+			]
+		},
+		{
+			"name": "Chat",
+			"item": [
+				{
+					"name": "Send AI Message",
+					"request": {
+						"method": "POST",
+						"header": [
+							{ "key": "Authorization", "value": "Bearer {{jwt_token}}" }
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"content\": \"What is the best fertilizer for my wheat crop?\",\n    \"domain\": \"AgriTech\"\n}",
+							"options": { "raw": { "language": "json" } }
+						},
+						"url": { "raw": "{{base_url}}/api/v1/chat/sessions/REPLACE_WITH_SESSION_ID/messages", "host": ["{{base_url}}"], "path": ["api", "v1", "chat", "sessions", "REPLACE_WITH_SESSION_ID", "messages"] }
+					}
+				}
+			]
+		}
+	],
+	"variable": [
+		{ "key": "base_url", "value": "http://localhost:5000" },
+		{ "key": "jwt_token", "value": "REPLACE_WITH_LOGIN_TOKEN" }
+	]
+}
