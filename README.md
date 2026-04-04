@@ -1,75 +1,90 @@
-# CraftCore
+# Craft core
 
-# 🌾 KrishiSetu — AI Powered Smart Farming Intelligence Platform
+# 🌾 KrishiSetu
 
-> "Smart Soil. Smart Farmers. Smart Future."
+### AI Powered Smart Farming & Soil Intelligence Platform
 
-🔗 **Live Demo:**
-https://spectacular-madeleine-37b944.netlify.app/
+<p align="center">
+  <img src="https://media.giphy.com/media/l0MYEqEzwMWFCg8rm/giphy.gif" width="100%" />
+</p>
 
----
-
-# 🌍 Overview
-
-KrishiSetu is an AI-powered smart agriculture dashboard that helps farmers make **data-driven decisions** using soil intelligence, climate analytics, and crop recommendations.
-
-Designed for:
-
-* Farmers
-* Agri startups
-* Government agriculture programs
-* Smart farming initiatives
+<p align="center">
+AI • Agriculture • Climate Smart Farming • Soil Intelligence
+</p>
 
 ---
 
-# 🎥 Demo Preview
+# 🚀 Live Demo
 
-### 🌱 Smart Farming Dashboard
-
-![Dashboard Animation](./assets/dashboard.gif)
-
-### 🗺️ India Soil Intelligence Map
-
-![India Map Animation](./assets/india-map.gif)
-
-### 🤖 AI Crop Recommendation
-
-![AI Animation](./assets/ai-crop.gif)
+🔗 https://spectacular-madeleine-37b944.netlify.app/
 
 ---
 
-# 🚀 Key Features
+# 🎯 Problem
 
-## 🌍 Interactive India Agriculture Map
+Farmers face major challenges:
 
-* State-wise soil health
-* Climate risk analytics
-* Crop productivity insights
-* Hover interactive UI
+* Wrong crop selection
+* Poor soil health decisions
+* Climate uncertainty
+* Water wastage
+* Low productivity
+
+These lead to **financial loss and unsustainable farming**.
+
+---
+
+# 💡 Solution
+
+KrishiSetu is an **AI-powered agriculture intelligence dashboard** that helps farmers:
+
+* Analyze soil health
+* Get AI crop recommendations
+* Monitor climate risk
+* Optimize irrigation
+* Improve yield
+
+---
+
+# 🌍 3D Agriculture Dashboard Preview
+
+<p align="center">
+<img src="https://media.giphy.com/media/3o7TKU8RvQuomFfUUU/giphy.gif" width="90%"/>
+</p>
+
+---
+
+# ✨ Core Features
+
+## 🗺️ Interactive India Soil Map
+
+* State-wise soil intelligence
+* Climate analytics
+* Crop productivity
+* Hover interaction
 
 ## 🌱 AI Crop Recommendation
 
-* Best crop suggestion
-* Soil based prediction
+* Soil based crop prediction
 * Yield estimation
-* Fertilizer recommendation
+* Profit calculation
 
 ## 💧 Smart Irrigation AI
 
-* Water saving analytics
+* Water saving suggestions
 * Irrigation timing
-* Moisture detection
+* Moisture analytics
 
 ## 🌾 Crop Health Monitoring
 
-* Field visualization
-* Health indicators
+* Visual indicators
 * Risk detection
+* Growth tracking
 
 ## 🌎 Save Soil Initiative
 
-* Global warming awareness
-* Sustainable farming tips
+* Sustainable farming
+* Climate smart agriculture
 * Carbon reduction
 
 ## 🤖 AI Farmer Assistant
@@ -80,55 +95,21 @@ Designed for:
 
 ---
 
-# ✨ Agriculture Animations
+# 🌱 3D Farming Animation
 
-## 🌱 Soil Health Animation
-
-* Live soil meter
-* Animated progress bars
-* Color-based health indicators
-
-![Soil Animation](./assets/soil-health.gif)
-
----
-
-## 🌾 Crop Growth Animation
-
-* Growth stages
-* Animated crop icons
-* Seasonal transitions
-
-![Crop Animation](./assets/crop-growth.gif)
-
----
-
-## 💧 Water Irrigation Animation
-
-* Drip irrigation visual
-* Water flow animation
-* Moisture level UI
-
-![Water Animation](./assets/water.gif)
-
----
-
-## 🌍 Climate Impact Animation
-
-* Temperature change
-* Rain forecast
-* Heatwave alerts
-
-![Climate Animation](./assets/climate.gif)
+<p align="center">
+<img src="https://media.giphy.com/media/xT0Gqz9yWZ7d0zS6cE/giphy.gif" width="70%"/>
+</p>
 
 ---
 
 # 🧠 How It Works
 
-1. Select region
-2. View soil intelligence
-3. Get AI crop suggestion
-4. Monitor climate risk
-5. Optimize irrigation
+1. Select Region
+2. Analyze Soil Data
+3. Get AI Recommendation
+4. Monitor Crop Health
+5. Optimize Farming
 
 ---
 
@@ -142,13 +123,13 @@ Designed for:
 
 ### Visualization
 
-* SVG Maps
-* Interactive Charts
-* Animated Dashboard
+* Interactive Maps
+* Charts
+* Dashboard UI
 
 ### AI Features
 
-* Crop Recommendation Engine
+* Crop Recommendation
 * Soil Intelligence
 * Climate Analytics
 
@@ -157,16 +138,16 @@ Designed for:
 # 📱 Responsive Design
 
 * Desktop Dashboard
-* Tablet Optimized
-* Mobile Friendly Farmer UI
+* Tablet UI
+* Mobile Friendly
 
 ---
 
-# 🎯 Impact
+# 📊 Impact
 
-KrishiSetu helps farmers:
+KrishiSetu helps:
 
-✅ Increase yield
+✅ Increase crop yield
 ✅ Reduce water usage
 ✅ Improve soil health
 ✅ Climate smart farming
@@ -176,20 +157,20 @@ KrishiSetu helps farmers:
 
 # 🔮 Future Scope
 
-* Satellite NDVI integration
-* IoT soil sensors
+* Satellite NDVI
+* IoT sensors
 * Pest detection AI
-* Market price prediction
-* Farmer voice assistant
+* Market prediction
+* Voice assistant
 
 ---
 
 # 👨‍💻 Team
 
-Team Name: Craft core 
+KrishiSetu — Hackathon Project
 
 ---
 
-# ❤️ Made for Farmers
+# ❤️ Made For Farmers
 
-"Empowering Agriculture Through Technology"
+"Technology Bridging Soil & Success"
