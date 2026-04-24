@@ -29,18 +29,29 @@ export default function Profile() {
   
   const [isEditing, setIsEditing] = useState(false);
   const [profile, setProfile] = useState<UserProfile>({
-    name: farmerName,
-    email: 'rajesh.kumar@krishisetu.in',
-    phone: '+91 98765 43210',
-    location: 'Ahmedabad, Gujarat',
-    avatar: 'https://images.unsplash.com/photo-1542010589005-d1eacc3918f2?auto=format&fit=crop&q=80&w=200&h=200'
+    name: farmerName || 'Farmer',
+    email: JSON.parse(localStorage.getItem('user') || '{}').email || 'No email',
+    phone: JSON.parse(localStorage.getItem('user') || '{}').phone || '+91 XXXXX XXXXX',
+    location: JSON.parse(localStorage.getItem('user') || '{}').location?.city || 'Location not set',
+    avatar: JSON.parse(localStorage.getItem('user') || '{}').avatar || 'https://images.unsplash.com/photo-1542010589005-d1eacc3918f2?auto=format&fit=crop&q=80&w=200&h=200'
   });
 
   // Load from localStorage on mount
   useEffect(() => {
-    const saved = localStorage.getItem('krishi_user_profile');
-    if (saved) {
-      setProfile(JSON.parse(saved));
+    const savedProfile = localStorage.getItem('krishi_user_profile');
+    const savedUser = localStorage.getItem('user');
+    
+    if (savedUser) {
+      const user = JSON.parse(savedUser);
+      setProfile(prev => ({
+        ...prev,
+        name: user.name,
+        email: user.email,
+        location: user.location?.city || user.location || prev.location,
+        avatar: user.avatar || prev.avatar
+      }));
+    } else if (savedProfile) {
+      setProfile(JSON.parse(savedProfile));
     }
   }, []);
 
@@ -84,8 +95,21 @@ export default function Profile() {
           
           <div className="flex flex-col md:flex-row items-center gap-8 relative z-10">
             <div className="relative group">
-              <div className="w-32 h-32 rounded-[40px] overflow-hidden border-4 border-teal-500/30 shadow-2xl relative">
-                <img src={profile.avatar} alt="Profile" className="w-full h-full object-cover transition-all group-hover:scale-110" />
+              <div className="w-32 h-32 rounded-[40px] overflow-hidden border-4 border-teal-500/30 shadow-2xl relative flex items-center justify-center bg-teal-500/10 text-teal-500 text-3xl font-black">
+                {profile.avatar ? (
+                  <img 
+                    src={profile.avatar} 
+                    alt="Profile" 
+                    className="w-full h-full object-cover transition-all group-hover:scale-110"
+                    referrerPolicy="no-referrer"
+                    onError={(e) => {
+                      (e.target as HTMLImageElement).style.display = 'none';
+                      setProfile({ ...profile, avatar: '' });
+                    }}
+                  />
+                ) : (
+                  profile.name.split(' ').map((n: string) => n[0]).join('').toUpperCase()
+                )}
                 {isEditing && (
                   <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
                     <Camera size={32} className="text-white" />

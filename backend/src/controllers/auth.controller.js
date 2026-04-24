@@ -61,7 +61,8 @@ const register = async (req, res, next) => {
                 email: user.email, 
                 role: user.role,
                 farmName: user.farmName,
-                totalAcres: user.totalAcres
+                totalAcres: user.totalAcres,
+                avatar: user.avatar
             }, 
             accessToken 
         }, 'User registered successfully', 201);
@@ -109,7 +110,8 @@ const login = async (req, res, next) => {
                 email: user.email, 
                 role: user.role, 
                 farmName: user.farmName,
-                totalAcres: user.totalAcres
+                totalAcres: user.totalAcres,
+                avatar: user.avatar
             },
             accessToken
         }, 'Login successful');

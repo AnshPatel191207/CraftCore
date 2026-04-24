@@ -45,6 +45,7 @@ export interface CropData {
 
 interface FarmState {
   farmerName: string;
+  avatar: string;
   farmName: string;
   totalAcres: number;
   soilReports: SoilReport[];
@@ -59,6 +60,8 @@ interface FarmState {
   activityFeed: { id: string; user: string; location: string; time: string; action: string }[];
   
   // Actions
+  setFarmerName: (name: string) => void;
+  setFarmData: (data: Partial<FarmState>) => void;
   updateCrops: (crops: CropData[]) => void;
   updateTotalAcres: (acres: number) => void;
   addSoilReport: (report: SoilReport) => void;
@@ -85,9 +88,10 @@ interface FarmState {
 }
 
 export const useFarmStore = create<FarmState>((set, get) => ({
-  farmerName: 'Rajesh Kumar',
-  farmName: 'Green Valley Farm',
-  totalAcres: 120,
+  farmerName: JSON.parse(localStorage.getItem('user') || '{}').name || '',
+  avatar: JSON.parse(localStorage.getItem('user') || '{}').avatar || '',
+  farmName: JSON.parse(localStorage.getItem('user') || '{}').farmName || 'My Farm',
+  totalAcres: JSON.parse(localStorage.getItem('user') || '{}').totalAcres || 0,
   soilReports: [], 
   selectedReportId: null,
   advisories: [], 
@@ -110,6 +114,9 @@ export const useFarmStore = create<FarmState>((set, get) => ({
     if (!selectedReportId) return null;
     return soilReports.find(r => (r._id === selectedReportId || r.id === selectedReportId)) || null;
   },
+
+  setFarmerName: (name: string) => set({ farmerName: name }),
+  setFarmData: (data: Partial<FarmState>) => set((state) => ({ ...state, ...data })),
 
   addSoilReport: (report) => set((state) => ({ 
     soilReports: [report, ...state.soilReports] 

@@ -13,23 +13,33 @@ import LanguageSwitcher, { useLanguage } from '../ui/LanguageSwitcher';
 import { useEffect } from 'react';
 
 export default function Topbar() {
-  const { activePage, setActivePage, setCommandPaletteOpen } = useFarmStore();
+  const { activePage, setActivePage, setCommandPaletteOpen, farmerName, avatar, farmName } = useFarmStore();
   const { theme, toggle } = useTheme();
   const { t } = useLanguage();
   const [mobileOpen, setMobileOpen] = useState(false);
   const [profile, setProfile] = useState({
-    name: 'Rajesh Kumar',
-    avatar: '',
-    initials: 'RK'
+    name: farmerName || 'Farmer',
+    avatar: avatar || '',
+    initials: farmerName ? farmerName.split(' ').map((n: string) => n[0]).join('').toUpperCase() : 'F'
   });
 
   const loadProfile = () => {
-    const saved = localStorage.getItem('krishi_user_profile');
-    if (saved) {
-      const data = JSON.parse(saved);
+    // 1. Try generic user object
+    const userJson = localStorage.getItem('user');
+    const profileJson = localStorage.getItem('krishi_user_profile');
+    
+    if (userJson) {
+      const user = JSON.parse(userJson);
+      setProfile({
+        name: user.name,
+        avatar: user.avatar || '',
+        initials: user.name.split(' ').map((n: string) => n[0]).join('').toUpperCase()
+      });
+    } else if (profileJson) {
+      const data = JSON.parse(profileJson);
       setProfile({
         name: data.name,
-        avatar: data.avatar,
+        avatar: data.avatar || '',
         initials: data.name.split(' ').map((n: string) => n[0]).join('').toUpperCase()
       });
     }
@@ -39,7 +49,7 @@ export default function Topbar() {
     loadProfile();
     window.addEventListener('profileUpdate', loadProfile);
     return () => window.removeEventListener('profileUpdate', loadProfile);
-  }, []);
+  }, [farmerName, avatar]);
 
   const NAV_LINKS = [
     { label: t('dashboard'), id: 'dashboard', icon: LayoutDashboard },
@@ -168,14 +178,23 @@ export default function Topbar() {
           >
             <div className="w-9 h-9 md:w-10 md:h-10 rounded-xl flex items-center justify-center text-[10px] font-black border border-teal-500/20 shadow-lg bg-teal-500/10 text-teal-500 group-hover:scale-105 transition-all overflow-hidden">
               {profile.avatar ? (
-                <img src={profile.avatar} alt="" className="w-full h-full object-cover" />
+                <img 
+                  src={profile.avatar} 
+                  alt="" 
+                  className="w-full h-full object-cover"
+                  referrerPolicy="no-referrer"
+                  onError={(e) => {
+                    (e.target as HTMLImageElement).style.display = 'none';
+                    setProfile({ ...profile, avatar: '' });
+                  }}
+                />
               ) : (
                 profile.initials
               )}
             </div>
             <div className="hidden xl:flex flex-col leading-none">
               <span className="text-xs font-black text-text group-hover:text-teal-500 transition-colors">{profile.name}</span>
-              <span className="text-[8px] font-black text-text-muted uppercase tracking-widest mt-0.5">Green Farm</span>
+              <span className="text-[8px] font-black text-text-muted uppercase tracking-widest mt-0.5">{farmName || 'My Farm'}</span>
             </div>
           </div>
 

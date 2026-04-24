@@ -20,9 +20,28 @@ export default function Login() {
       const response: any = await api.post('/auth/login', { email, password });
       
       if (response && response.data) {
+        const user = response.data.user;
         localStorage.setItem('token', response.data.accessToken);
-        localStorage.setItem('user', JSON.stringify(response.data.user));
+        localStorage.setItem('user', JSON.stringify(user));
         localStorage.setItem('isLoggedIn', 'true');
+        
+        // Update store
+        useFarmStore.getState().setFarmerName(user.name);
+        useFarmStore.getState().setFarmData({
+          farmerName: user.name,
+          avatar: user.avatar || '',
+          farmName: user.farmName,
+          totalAcres: user.totalAcres
+        });
+
+        // Sync for Topbar
+        localStorage.setItem('krishi_user_profile', JSON.stringify({
+          name: user.name,
+          email: user.email,
+          avatar: user.avatar || ''
+        }));
+        window.dispatchEvent(new Event('profileUpdate'));
+
         setActivePage('dashboard');
       } else {
         throw new Error('Connection failed. Please check your network.');

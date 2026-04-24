@@ -21,6 +21,7 @@ import { useFarmStore } from './store/farmStore';
 import { motion, AnimatePresence } from 'framer-motion';
 import { LanguageProvider } from './components/ui/LanguageSwitcher';
 import { useState, useEffect } from 'react';
+import api from './lib/api';
 
 function App() {
   const {
@@ -29,7 +30,9 @@ function App() {
     setPanelOpen,
     isCommandPaletteOpen,
     setCommandPaletteOpen,
-    setActivePage
+    setActivePage,
+    setFarmerName,
+    setFarmData
   } = useFarmStore();
 
   const [showSplash, setShowSplash] = useState(true);
@@ -40,7 +43,36 @@ function App() {
     setShowSplash(false);
   };
 
-  // ── Handle Google OAuth Callback ──
+  // ── Fetch User Details ──
+  const fetchUserDetails = async () => {
+    try {
+      const response: any = await api.get('/auth/me');
+      if (response && response.data && response.data.user) {
+        const user = response.data.user;
+        localStorage.setItem('user', JSON.stringify(user));
+        setFarmerName(user.name);
+        setFarmData({
+          farmerName: user.name,
+          avatar: user.avatar || '',
+          farmName: user.farmName,
+          totalAcres: user.totalAcres
+        });
+        
+        // Also sync to krishi_user_profile for Topbar
+        const profile = {
+          name: user.name,
+          email: user.email,
+          avatar: user.avatar || '',
+        };
+        localStorage.setItem('krishi_user_profile', JSON.stringify(profile));
+        window.dispatchEvent(new Event('profileUpdate'));
+      }
+    } catch (error) {
+      console.error('Failed to fetch user details:', error);
+    }
+  };
+
+  // ── Handle Google OAuth Callback & App Mount ──
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);
     const token = urlParams.get('token');
@@ -50,7 +82,10 @@ function App() {
       localStorage.setItem('isLoggedIn', 'true');
       // Remove token from URL to keep it clean
       window.history.replaceState({}, document.title, window.location.pathname);
+      fetchUserDetails();
       setActivePage('dashboard');
+    } else if (localStorage.getItem('isLoggedIn') === 'true' && !useFarmStore.getState().farmerName) {
+      fetchUserDetails();
     }
   }, [setActivePage]);
 
@@ -171,8 +206,8 @@ function App() {
             />
 
             {/* Dynamic Background Noise/Texture */}
-            <div className="fixed inset-0 pointer-events-none opacity-[0.03] z-[200] mix-blend-overlay">
-              <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')]" />
+            <div className="fixed inset-0 pointer-events-none opacity-[0.05] z-[200] mix-blend-overlay">
+              <div className="absolute inset-0 bg-[url('data:image/svg+xml,%3Csvg viewBox=%220 0 200 200%22 xmlns=%22http://www.w3.org/2000/svg%22%3E%3Cfilter id=%22noiseFilter%22%3E%3CfeTurbulence type=%22fractalNoise%22 baseFrequency=%220.65%22 numOctaves=%223%22 stitchTiles=%22stitch%22/%3E%3C/filter%3E%3Crect width=%22100%25%22 height=%22100%25%22 filter=%22url(%23noiseFilter)%22/%3E%3C/svg%3E')]" />
             </div>
           </motion.div>
         )}
